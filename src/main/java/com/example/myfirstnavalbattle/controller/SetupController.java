@@ -2,13 +2,17 @@ package com.example.myfirstnavalbattle.controller;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
+import com.example.myfirstnavalbattle.model.Characters;
+import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
@@ -27,19 +31,46 @@ public class SetupController {
     private HBox hBox;
     @FXML
     private Button readyButton;
+    @FXML
+    private ImageView characterImage;
 
+    @FXML
+    private TextField userNameTextField;
+
+    private Characters actualCharacter;
 
     private final int CELL_SIZE = 50;
 
 
     @FXML
     public void initialize() {
-        readyButton.setDisable(true);
         initGridPane();
         initShips();
+        initUserInfo();
+
         gridpane.setPrefSize(500, 500);
         gridpane.setMaxSize(500, 500);
         gridpane.setMinSize(500, 500);
+
+    }
+
+    private void initUserInfo(){
+        actualCharacter = SelectCharacter.getSelectedCharacter();
+        Image image = actualCharacter.getImage();
+
+        characterImage.setImage(image);
+        characterImage.setFitHeight(300);
+        characterImage.setFitWidth(300);
+        characterImage.setVisible(false);
+
+        readyButton.setDisable(true);
+        readyButton.setVisible(false);
+
+        userNameTextField.setDisable(true);
+        userNameTextField.setVisible(false);
+        userNameTextField.textProperty().addListener((obs, oldText, newText) -> {
+            readyButton.setDisable(newText.length() <= 3);
+        });
     }
 
     private void initShips() {
@@ -210,7 +241,7 @@ public class SetupController {
                     ship.rotateShip();
                 }
                 hBox.getChildren().add(ship);
-                activateButton();
+                activateUserInfo();
             }
         });
 
@@ -249,7 +280,7 @@ public class SetupController {
             }
             event.setDropCompleted(success);
             event.consume();
-            activateButton();
+            activateUserInfo();
         });
     }
 
@@ -282,6 +313,7 @@ public class SetupController {
 
     @FXML
     private void handleBackButton() throws IOException {
+        actualCharacter.setUsername(userNameTextField.getText());
         SceneManager.switchScene("HomeScene");
     }
 
@@ -290,8 +322,21 @@ public class SetupController {
         SceneManager.switchScene("GameScene");
     }
 
-    private void activateButton() {
-        readyButton.setDisable(!hBox.getChildren().isEmpty());
+    private void activateUserInfo() {
+        if(hBox.getChildren().isEmpty()){
+            readyButton.setVisible(true);
+            characterImage.setVisible(true);
+            userNameTextField.setVisible(true);
+            userNameTextField.setDisable(false);
+        }
+        else{
+            characterImage.setVisible(false);
+            readyButton.setVisible(false);
+            readyButton.setDisable(true);
+            userNameTextField.setDisable(true);
+            userNameTextField.setVisible(false);
+            userNameTextField.setText("");
+        }
     }
 
 }

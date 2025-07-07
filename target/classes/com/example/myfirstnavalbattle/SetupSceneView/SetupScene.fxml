@@ -5,6 +5,8 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.TextField?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             stylesheets="@SetupSceneStyle.css"
@@ -30,10 +32,21 @@
             onAction="#handleBackButton">
     </Button>
 
-    <Button layoutX="1000" layoutY="600"
+    <Button layoutX="900" layoutY="500"
             styleClass="ready-button"
             text="LISTO" onAction="#handleReadyButton"
             fx:id="readyButton">
     </Button>
+
+    <ImageView layoutX="850" layoutY="120"
+               fx:id="characterImage">
+    </ImageView>
+
+    <TextField fx:id="userNameTextField"
+               promptText="Digite el nombre de usuario"
+               layoutX="868" layoutY="450"
+               alignment="CENTER"
+               minWidth="300" minHeight="30" styleClass="textField">
+    </TextField>
 
 </AnchorPane>
