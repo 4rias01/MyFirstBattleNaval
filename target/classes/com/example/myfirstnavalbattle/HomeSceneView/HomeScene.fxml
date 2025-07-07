@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane maxHeight="-Infinity"
+            fx:id="root"
+            maxWidth="-Infinity"
+            minHeight="-Infinity"
+            stylesheets="@HomeSceneStyle.css"
+            minWidth="-Infinity"
+            styleClass="anchorpane"
+            fx:controller="com.example.myfirstnavalbattle.controller.HomeController"
+            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1">
+
+   <Rectangle layoutX="383" layoutY="30"
+              height="660" width="600"
+              styleClass="rectangles">
+   </Rectangle>
+
+   <Label id="titleLable"
+          layoutY="160"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0"
+          text="Battleship War Z"
+          alignment="CENTER"
+          styleClass="title-label"/>
+
+   <ImageView layoutX="508" layoutY="17">
+      <Image url="@../Images/rudder.png"/>
+   </ImageView>
+
+   <ImageView layoutX="10" layoutY="10"
+              fx:id="characterImage1">
+   </ImageView>
+
+   <StackPane layoutY="380" layoutX="563">
+      <VBox spacing="8">
+         <Button text="NUEVO JUEGO" styleClass="menu-button" fx:id="playButton" onAction="#handlePlay"/>
+         <Button text="CONTINUAR" styleClass="menu-button" fx:id="continueButton" onAction="#handleContinue"/>
+         <Button text="PERSONAJES" styleClass="menu-button" fx:id="characterButton" onAction="#handleCharacter"/>
+      </VBox>
+   </StackPane>
+
+</AnchorPane>
