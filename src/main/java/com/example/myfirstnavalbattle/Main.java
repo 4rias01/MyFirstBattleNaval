@@ -16,7 +16,7 @@ public class Main extends Application {
         loadFonts();
 
         SceneManager.setStage(mainStage);
-        SceneManager.switchScene("HomeScene");
+        SceneManager.switchScene("SetupScene");
 
         mainStage.setTitle("Battleship War Z");
         mainStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream(

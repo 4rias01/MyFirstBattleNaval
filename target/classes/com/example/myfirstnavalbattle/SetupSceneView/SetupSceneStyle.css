@@ -72,3 +72,8 @@
     -fx-background-color: white;
     -fx-text-fill: black;
 }
+
+.textField{
+    -fx-font-size: 18;
+    -fx-background-radius: 5px;
+}
