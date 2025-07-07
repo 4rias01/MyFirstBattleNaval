@@ -68,9 +68,9 @@ public class SetupController {
 
         userNameTextField.setDisable(true);
         userNameTextField.setVisible(false);
-        userNameTextField.textProperty().addListener((obs, oldText, newText) -> {
-            readyButton.setDisable(newText.length() <= 3);
-        });
+        userNameTextField.textProperty().addListener(
+                (obs, oldText, newText)
+                        -> readyButton.setDisable(newText.length() <= 3));
     }
 
     private void initShips() {

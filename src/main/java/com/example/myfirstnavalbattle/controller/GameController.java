@@ -11,6 +11,6 @@ public class GameController {
 
     @FXML
     private void handleBackButton() throws IOException {
-        SceneManager.switchScene("SetupScene");
+        SceneManager.switchScene("HomeScene");
     }
 }
