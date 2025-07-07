@@ -287,7 +287,7 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-
+        SceneManager.switchScene("GameScene");
     }
 
     private void activateButton() {
