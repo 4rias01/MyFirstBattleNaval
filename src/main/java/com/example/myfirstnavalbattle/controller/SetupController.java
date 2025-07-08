@@ -7,7 +7,6 @@ import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -40,6 +39,9 @@ public class SetupController {
     private Characters actualCharacter;
 
     private final int CELL_SIZE = 50;
+    private final int GRID_SIZE = 10;
+
+    private Cell[][] cells = null;
 
 
     @FXML
@@ -88,12 +90,14 @@ public class SetupController {
 
     @FXML
     private void initGridPane() {
-        int gridPaneSize = 10;
-        for (int row = 0; row < gridPaneSize; row++) {
-            for (int col = 0; col < gridPaneSize; col++) {
+        cells = new Cell[GRID_SIZE][GRID_SIZE];
+
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
                 Cell cell = new Cell(row, col);
                 cell.setPrefSize(CELL_SIZE, CELL_SIZE);
 
+                cells[row][col] = cell;
 
                 cellOnDragOver(cell);
                 cellOnDragDropped(cell);
@@ -291,25 +295,14 @@ public class SetupController {
         return ship.snapshot(params, null);
     }
 
-    @FXML
+
     private Cell getCell(int row, int col) {
-        for (Node node : gridpane.getChildren()) {
-            if (safeRowIndex(node) == row && safeColIndex(node) == col && node instanceof Cell) {
-                return (Cell) node;
-            }
+        if (row >= GRID_SIZE || col >= GRID_SIZE) {
+            return null;
         }
-        return null;
+        return cells[row][col];
     }
 
-    private int safeRowIndex(Node node) {
-        Integer value = GridPane.getRowIndex(node);
-        return value != null ? value : 0;
-    }
-
-    private int safeColIndex(Node node) {
-        Integer value = GridPane.getColumnIndex(node);
-        return value != null ? value : 0;
-    }
 
     @FXML
     private void handleBackButton() throws IOException {

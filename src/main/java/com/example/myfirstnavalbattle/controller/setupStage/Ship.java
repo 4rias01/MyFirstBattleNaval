@@ -43,7 +43,7 @@ public class Ship extends Rectangle {
             default:
                 System.out.println("Error, numero invalido");
         }
-        setWidth(40);
+        setWidth(50);
         vertical = true;
     }
 
