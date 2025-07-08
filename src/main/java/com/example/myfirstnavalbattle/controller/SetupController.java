@@ -2,11 +2,13 @@ package com.example.myfirstnavalbattle.controller;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
+import com.example.myfirstnavalbattle.model.Board;
 import com.example.myfirstnavalbattle.model.Characters;
 import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -32,11 +34,11 @@ public class SetupController {
     private Button readyButton;
     @FXML
     private ImageView characterImage;
-
     @FXML
     private TextField userNameTextField;
 
     private Characters actualCharacter;
+    private static GridPane gridPaneGame;
 
     private final int CELL_SIZE = 50;
     private final int GRID_SIZE = 10;
@@ -306,13 +308,19 @@ public class SetupController {
 
     @FXML
     private void handleBackButton() throws IOException {
-        actualCharacter.setUsername(userNameTextField.getText());
         SceneManager.switchScene("HomeScene");
     }
 
     @FXML
     private void handleReadyButton() throws IOException {
+        gridPaneGame = gridpane;
+        actualCharacter.setUsername(userNameTextField.getText());
+        Board board = new Board(cells, GRID_SIZE);
         SceneManager.switchScene("GameScene");
+    }
+
+    public static GridPane getGridPaneGame() {
+        return gridPaneGame;
     }
 
     private void activateUserInfo() {

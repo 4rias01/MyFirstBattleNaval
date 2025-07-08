@@ -25,16 +25,15 @@ public class ModelCell {
         this.col = -1;
     }
 
-    public ModelCell(int row, int col) {
+    public ModelCell(int row, int col, Status status) {
+        this.status = status;
         this.row = row;
         this.col = col;
-        setStatus(ModelCell.Status.EMPTY);
     }
 
 
     public void setStatus(Status status){
         this.status = status;
-
     }
 
 

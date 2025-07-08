@@ -13,6 +13,10 @@
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="400.0" prefWidth="600.0">
 
+    <GridPane fx:id="gameGrid"
+              layoutY="200" layoutX="200">
+    </GridPane>
+
     <Button layoutY="20" layoutX="20"
             styleClass="back-button"
             onAction="#handleBackButton">

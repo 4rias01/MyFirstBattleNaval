@@ -7,9 +7,9 @@ public class Board {
 
     public Board() {}
 
-    public Board(Cell cells[][]) {
-        for (int row = 0; row < 10; row++) {
-            for (int col = 0; col < 10; col++) {
+    public Board(Cell[][] cells, int size) {
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
                 ModelCell modelCell = cellToModel(cells[row][col]);
                 modelCells[row][col] = modelCell;
             }
@@ -26,9 +26,7 @@ public class Board {
             default -> null;
         };
 
-        ModelCell modelCell = new ModelCell(row, col);
-        modelCell.setStatus(status);
-        return modelCell;
+        return new ModelCell(row, col, status);
     }
 
 }

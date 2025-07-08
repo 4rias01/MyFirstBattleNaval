@@ -78,6 +78,10 @@ public class Ship extends Rectangle {
                         "/com/example/myfirstnavalbattle/Images/ships/SIZE_"+ size +"_"+rotation+".png"))));
     }
 
+    private ImagePattern getCurrentImage(){
+        return currentImage;
+    }
+
     public boolean isVertical() {
         return vertical;
     }
