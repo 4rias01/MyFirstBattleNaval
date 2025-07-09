@@ -23,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class SetupController {
     @FXML
@@ -42,10 +43,14 @@ public class SetupController {
     public final static int GRID_SIZE = 10;
 
     private Cell[][] cells = null;
+    private ArrayList<Ship> ships = null;
 
 
     @FXML
     public void initialize() {
+        ships = new ArrayList<>();
+        cells = new Cell[GRID_SIZE][GRID_SIZE];
+
         initGridPane();
         initShips();
         initUserInfo();
@@ -90,7 +95,6 @@ public class SetupController {
 
     @FXML
     private void initGridPane() {
-        cells = new Cell[GRID_SIZE][GRID_SIZE];
 
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
@@ -197,6 +201,7 @@ public class SetupController {
         shipOnDragListener(ship);
         clickOnShipListener(ship);
         hBox.getChildren().add(ship);
+        ships.add(ship);
     }
 
     private void shipOnDragListener(Ship ship) {
@@ -311,7 +316,7 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-        Board board = new Board(gridpane, cells);
+        Board board = new Board(gridpane, cells, ships);
         GameController.setBoard(board);
         actualCharacter.setUsername(userNameTextField.getText());
         SceneManager.switchScene("GameScene");

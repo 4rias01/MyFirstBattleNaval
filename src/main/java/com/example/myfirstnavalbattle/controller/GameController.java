@@ -3,7 +3,6 @@ package com.example.myfirstnavalbattle.controller;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 import com.example.myfirstnavalbattle.model.Board;
-import com.example.myfirstnavalbattle.model.ModelCell;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
@@ -12,13 +11,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class GameController {
 
     @FXML
     private GridPane gridPaneGame;
-    private ModelCell[][] modelCells = null;
-    private Ship[] shipsArray = null;
+    private ArrayList<Ship> shipsArray = null;
 
     private static Board board;
 
@@ -32,8 +31,8 @@ public class GameController {
         gridPaneGame.setPrefSize(500, 500);
         gridPaneGame.setMaxSize(500, 500);
         gridPaneGame.setMinSize(500, 500);
-        initGridGame();
         shipsArray = board.getModelShipsArray();
+        initGridPaneGame();
         initShipsImages();
 
         /*
@@ -56,7 +55,7 @@ public class GameController {
 
     }
 
-    private void initGridGame() {
+    private void initGridPaneGame() {
         int size = SetupController.GRID_SIZE;
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
@@ -93,7 +92,6 @@ public class GameController {
             shipImage.setMouseTransparent(true);
 
             putShipImage(row, col, shipImage, vertical, size);
-
         }
     }
 
