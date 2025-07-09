@@ -127,7 +127,7 @@ public class SetupController {
         int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 2
         int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
 
-        boolean canBePlace = canBePlaced(targetRow, targetCol, ship);
+        boolean canBePlace = canBePlaced(targetRow, targetCol, vertical, size);
 
         if (canBePlace && ship.getParent() instanceof GridPane) {
             int oldRow, oldCol;
@@ -176,20 +176,21 @@ public class SetupController {
         GridPane.setRowSpan(ship, spanRows);
     }
 
+    private boolean canBePlaced(int row, int col, boolean vertical, int size) {
+        int init = vertical ? row : col;
+        for (int target = init; target < init + size; target++) {
 
-    private boolean canBePlaced(int row, int col, Ship ship) {
-        int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 4
-        int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
-
-        for (int targetRow = row; targetRow < row + spanRows; targetRow++) {
-            for (int targetCol = col; targetCol < col + spanCols; targetCol++) {
-
-                Cell cell = getCell(targetRow, targetCol);
-                if (cell == null) { return false; }
-                if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+            Cell cell;
+            if (vertical) {
+                cell = getCell(target,col);
             }
-        }
+            else {
+                cell = getCell(row,target);
+            }
 
+            if (cell == null) { return false; }
+            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+        }
         return true;
     }
 
@@ -264,7 +265,7 @@ public class SetupController {
             }
             if (Ship.currentlyDraggedShip != null) {
                 Ship ship = Ship.currentlyDraggedShip;
-                if (canBePlaced(cell.getRow(), cell.getCol(), ship)) {
+                if (canBePlaced(cell.getRow(), cell.getCol(), ship.isVertical(), ship.getSize())) {
                     setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER, null);
                 }
             }

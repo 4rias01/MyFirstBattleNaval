@@ -26,14 +26,19 @@ public class ModelCell {
         col = cell.getCol();
         this.ship = cell.getShip();
 
-        ModelCell.Status status = switch (cell.getStatus()) {
-            case EMPTY -> ModelCell.Status.EMPTY;
-            case SHIP -> ModelCell.Status.SHIP;
+        this.status = switch (cell.getStatus()) {
+            case EMPTY -> Status.EMPTY;
+            case SHIP -> Status.SHIP;
             default -> null;
         };
-        this.status = status;
     }
 
+    public ModelCell(int row, int col) {
+        this.row = row;
+        this.col = col;
+        ship = null;
+        status = Status.EMPTY;
+    }
 
     public void setStatus(Status status){
         this.status = status;

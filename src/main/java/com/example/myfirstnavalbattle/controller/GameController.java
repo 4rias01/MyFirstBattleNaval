@@ -16,24 +16,25 @@ import java.util.ArrayList;
 public class GameController {
 
     @FXML
-    private GridPane gridPaneGame;
+    private GridPane gridPanePlayer;
     private ArrayList<Ship> shipsArray = null;
 
     private static Board board;
 
     public GameController() {
-        gridPaneGame = null;
+        gridPanePlayer = null;
     }
 
     @FXML
     public void initialize() {
 
-        gridPaneGame.setPrefSize(500, 500);
-        gridPaneGame.setMaxSize(500, 500);
-        gridPaneGame.setMinSize(500, 500);
-        shipsArray = board.getModelShipsArray();
+        gridPanePlayer.setPrefSize(500, 500);
+        gridPanePlayer.setMaxSize(500, 500);
+        gridPanePlayer.setMinSize(500, 500);
+
+        shipsArray = board.getPlayerShips();
         initGridPaneGame();
-        initShipsImages();
+        initPlayerShips();
 
         /*
         for (int x=0; x<cells.length; x++) {
@@ -67,7 +68,7 @@ public class GameController {
 
                 GridPane.setRowIndex(stackPane, row);
                 GridPane.setColumnIndex(stackPane, col);
-                gridPaneGame.getChildren().add(stackPane);
+                gridPanePlayer.getChildren().add(stackPane);
             }
         }
     }
@@ -78,7 +79,7 @@ public class GameController {
         });
     }
 
-    private void initShipsImages(){
+    private void initPlayerShips(){
         for (Ship ship : shipsArray) {
 
             int[] coords = (int[]) ship.getUserData();
@@ -99,7 +100,7 @@ public class GameController {
         int width = 48;
         int height = (50*size)-10;
 
-        gridPaneGame.add(image, col, row);
+        gridPanePlayer.add(image, col, row);
         if (vertical) {
             image.setFitHeight(height);
             image.setFitWidth(width);

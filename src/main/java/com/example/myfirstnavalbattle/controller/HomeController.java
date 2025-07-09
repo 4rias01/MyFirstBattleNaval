@@ -30,7 +30,6 @@ public class HomeController {
 
     @FXML
     private void handlePlay() throws IOException {
-        Ship.shipsCount = 0;
         SceneManager.switchScene("SetupScene");
     }
 

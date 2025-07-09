@@ -13,7 +13,6 @@ public class Ship extends Rectangle {
     private ImagePattern imageVertical;
     private ImagePattern imageHorizontal;
 
-    public static int shipsCount = 0;
     private boolean vertical;
     private int size;
 
@@ -46,7 +45,6 @@ public class Ship extends Rectangle {
         }
         setWidth(48);
         vertical = true;
-        shipsCount++;
     }
 
     private void setImages(int numImage){
