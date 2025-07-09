@@ -1,9 +1,11 @@
 package com.example.myfirstnavalbattle.model;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;
-import javafx.css.PseudoClass;
+import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 
 public class ModelCell {
+
+
     public enum Status {
         EMPTY,
         SHIP,
@@ -16,19 +18,20 @@ public class ModelCell {
 
     private final int row;
     private final int col;
+    private final Ship ship;
 
 
+    public ModelCell(Cell cell) {
+        row = cell.getRow();
+        col = cell.getCol();
+        this.ship = cell.getShip();
 
-    public ModelCell() {
-        this.status = ModelCell.Status.EMPTY;
-        this.row = -1;
-        this.col = -1;
-    }
-
-    public ModelCell(int row, int col, Status status) {
+        ModelCell.Status status = switch (cell.getStatus()) {
+            case EMPTY -> ModelCell.Status.EMPTY;
+            case SHIP -> ModelCell.Status.SHIP;
+            default -> null;
+        };
         this.status = status;
-        this.row = row;
-        this.col = col;
     }
 
 
@@ -36,6 +39,9 @@ public class ModelCell {
         this.status = status;
     }
 
+    public Ship getShip() {
+        return ship;
+    }
 
     public Status getStatus() { return status; }
     public int getRow() { return row; }

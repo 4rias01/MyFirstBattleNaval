@@ -9,6 +9,8 @@ public class Cell extends StackPane {
         SHIP,
         OVER
     }
+
+    private Ship ship;
     private final int row;
     private final int col;
 
@@ -18,11 +20,6 @@ public class Cell extends StackPane {
 
     private Status status;
 
-    public Cell() {
-        this.status = Status.EMPTY;
-        this.row = -1;
-        this.col = -1;
-    }
 
     public Cell(int row, int col) {
         this.row = row;
@@ -48,6 +45,11 @@ public class Cell extends StackPane {
     }
     public Status getStatus() { return status; }
 
+    public void setShip(Ship ship) {
+        this.ship = ship;
+    }
+
+    public Ship getShip() { return ship; }
     public int getRow() { return row; }
     public int getCol() { return col; }
 }

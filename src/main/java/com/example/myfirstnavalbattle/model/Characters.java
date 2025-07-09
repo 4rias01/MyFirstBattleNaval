@@ -13,7 +13,7 @@ public class Characters {
 
     public Characters(String name) {
         this.name = "Capitán "+ name;
-        this.image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/myfirstnavalbattle/Images/CAPTAIN" + name.toUpperCase() + ".png")));
+        this.image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/myfirstnavalbattle/Images/captains/CAPTAIN" + name.toUpperCase() + ".png")));
         this.username = null;
     }
 

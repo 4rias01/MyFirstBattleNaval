@@ -23,9 +23,9 @@ public class AnimationsManager {
     private static final Map<Node, Animation[]> activeAnimations = new HashMap<>();
 
     static{
-        cursorDefault = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/CURSORDEFAULT.png"))));
-        cursorHover = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/CURSORHOVER.png"))), 28, 28);
-        cursorPressed = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/CURSORPRESSED.png"))),28, 28);
+        cursorDefault = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/sceneImages/CURSORDEFAULT.png"))));
+        cursorHover = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/sceneImages/CURSORHOVER.png"))), 28, 28);
+        cursorPressed = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/sceneImages/CURSORPRESSED.png"))),28, 28);
     }
 
     public static void applyGlobalCursor(Scene scene) {
@@ -74,9 +74,7 @@ public class AnimationsManager {
         activeAnimations.put(node, new Animation[]{animation});
     }
 
-
-
-
+    /*
     private static void cancelAnimations(Node node) {
         Animation[] running = activeAnimations.get(node);
         if (running != null) {
@@ -87,6 +85,6 @@ public class AnimationsManager {
             }
             activeAnimations.remove(node);
         }
-    }
+    }*/
 
 }

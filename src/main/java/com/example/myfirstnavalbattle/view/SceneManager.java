@@ -13,7 +13,7 @@ public class SceneManager {
     public static void setStage(Stage stage) { mainStage = stage; }
 
     public static void switchScene(String sceneName) throws IOException {
-        FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource("/com/example/myfirstnavalbattle/"+ sceneName + "View/" + sceneName + ".fxml"));
+        FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource("/com/example/myfirstnavalbattle/scenes/"+ sceneName + "View/" + sceneName + ".fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
 

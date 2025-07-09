@@ -20,8 +20,7 @@ public class Main extends Application {
 
         mainStage.setTitle("Battleship War Z");
         mainStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream(
-                "/com/example/myfirstnavalbattle/images/favicon.jpg"))));
-
+                "/com/example/myfirstnavalbattle/images/sceneImages/favicon.jpg"))));
         mainStage.show();
     }
 

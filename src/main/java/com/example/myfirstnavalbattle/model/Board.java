@@ -1,32 +1,68 @@
 package com.example.myfirstnavalbattle.model;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;
+import com.example.myfirstnavalbattle.controller.setupStage.Ship;
+import javafx.scene.Node;
+import javafx.scene.layout.GridPane;
 
 public class Board {
-    ModelCell[][] modelCells = new ModelCell[10][10];
+
+    Cell[][] setupCells = null;
+    ModelCell[][] modelCellsArray = null;
+    GridPane gridPane = null;
+
+    Ship[] modelShips = null;
+    int shipsCount = 0;
 
     public Board() {}
 
-    public Board(Cell[][] cells, int size) {
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                ModelCell modelCell = cellToModel(cells[row][col]);
-                modelCells[row][col] = modelCell;
+    public Board(GridPane grid, Cell[][] setupCells) {
+        gridPane = grid;
+        this.setupCells = setupCells;
+        int rowsLength = setupCells.length;
+        int columnsLength = setupCells[0].length;
+
+        modelCellsArray = new ModelCell[rowsLength][columnsLength];
+        modelShips = new Ship[Ship.shipsCount];
+
+        initCells();
+        initShips();
+    }
+
+    private void initCells() {
+        for (int row = 0; row < setupCells.length; row++) {
+            for (int col = 0; col < setupCells[row].length; col++) {
+
+                ModelCell modelCell = new ModelCell(setupCells[row][col]);
+                modelCellsArray[row][col] = modelCell;
             }
         }
     }
 
-    private ModelCell cellToModel(Cell cell) {
-        int row = cell.getRow();
-        int col = cell.getCol();
+    private void initShips() {
+        for (Node node : gridPane.getChildren()) {
+            if (node instanceof Ship ship) {
+                addShip(ship);
+            }
+        }
+    }
 
-        ModelCell.Status status = switch (cell.getStatus()) {
-            case EMPTY -> ModelCell.Status.EMPTY;
-            case SHIP -> ModelCell.Status.SHIP;
-            default -> null;
-        };
 
-        return new ModelCell(row, col, status);
+    public void addShip(Ship ship) {
+        modelShips[shipsCount] = ship;
+        shipsCount++;
+    }
+
+    public Ship getShip(int row, int col) {
+        return getCell(row, col).getShip();
+    }
+
+    public ModelCell getCell(int row, int col) {
+        return modelCellsArray[row][col];
+    }
+
+    public ModelCell[][] getCellsArray() {
+        return modelCellsArray;
     }
 
 }

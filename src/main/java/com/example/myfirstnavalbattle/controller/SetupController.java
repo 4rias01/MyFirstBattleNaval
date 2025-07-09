@@ -8,7 +8,6 @@ import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -43,7 +42,7 @@ public class SetupController {
     private final int CELL_SIZE = 50;
     private final int GRID_SIZE = 10;
 
-    private Cell[][] cells = null;
+    private static Cell[][] cells = null;
 
 
     @FXML
@@ -132,32 +131,34 @@ public class SetupController {
             int[] coords = (int[]) ship.getUserData();
             oldRow = coords[0];
             oldCol = coords[1];
-            setCellState(oldRow, oldCol, size, vertical, Cell.Status.EMPTY);
+            setCellState(oldRow, oldCol, size, vertical, Cell.Status.EMPTY, null);
 
             ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP);
+            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
             placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
         } else if (canBePlace) {
             ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP);
+            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
             placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
         }
 
     }
 
 
-    private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status){
+    private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status, Ship ship) {
         if (vertical) {
             for (int targetRow = row; targetRow < row + size; targetRow++) {
                 Cell cell = getCell(targetRow,col);
                 assert cell != null;
                 cell.setStatus(status);
+                cell.setShip(ship);
             }
         } else {
             for (int targetCol = col; targetCol < col + size; targetCol++) {
                 Cell cell = getCell(row, targetCol);
                 assert cell != null;
                 cell.setStatus(status);
+                cell.setShip(ship);
             }
         }
     }
@@ -240,7 +241,7 @@ public class SetupController {
                 row = coords[0];
                 col = coords[1];
 
-                setCellState(row, col, size, vertical, Cell.Status.EMPTY);
+                setCellState(row, col, size, vertical, Cell.Status.EMPTY, null);
 
                 ((Pane) ship.getParent()).getChildren().remove(ship);
                 if (!vertical) {
@@ -262,7 +263,7 @@ public class SetupController {
             if (Ship.currentlyDraggedShip != null) {
                 Ship ship = Ship.currentlyDraggedShip;
                 if (canBePlaced(cell.getRow(), cell.getCol(), ship)) {
-                    setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER);
+                    setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER, null);
                 }
             }
             event.consume();
@@ -270,7 +271,7 @@ public class SetupController {
         cell.setOnDragExited(event -> {
             if (Ship.currentlyDraggedShip != null && cell.getStatus() == Cell.Status.OVER) {
                 Ship ship = Ship.currentlyDraggedShip;
-                setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.EMPTY);
+                setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.EMPTY, null);
 
             }
         });
@@ -305,6 +306,9 @@ public class SetupController {
         return cells[row][col];
     }
 
+    public int getSize(){
+        return GRID_SIZE;
+    }
 
     @FXML
     private void handleBackButton() throws IOException {
@@ -313,15 +317,12 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-        gridPaneGame = gridpane;
+        Board board = new Board(gridpane, cells);
+        GameController.setBoard(board);
         actualCharacter.setUsername(userNameTextField.getText());
-        Board board = new Board(cells, GRID_SIZE);
         SceneManager.switchScene("GameScene");
     }
 
-    public static GridPane getGridPaneGame() {
-        return gridPaneGame;
-    }
 
     private void activateUserInfo() {
         if(hBox.getChildren().isEmpty()){
