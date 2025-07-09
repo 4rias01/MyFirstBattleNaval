@@ -37,12 +37,11 @@ public class SetupController {
     private TextField userNameTextField;
 
     private Characters actualCharacter;
-    private static GridPane gridPaneGame;
 
     private final int CELL_SIZE = 50;
-    private final int GRID_SIZE = 10;
+    public final static int GRID_SIZE = 10;
 
-    private static Cell[][] cells = null;
+    private Cell[][] cells = null;
 
 
     @FXML
@@ -172,8 +171,6 @@ public class SetupController {
         GridPane.setColumnSpan(ship, spanCols);
         GridPane.setRowSpan(ship, spanRows);
     }
-
-
 
 
     private boolean canBePlaced(int row, int col, Ship ship) {
@@ -306,9 +303,6 @@ public class SetupController {
         return cells[row][col];
     }
 
-    public int getSize(){
-        return GRID_SIZE;
-    }
 
     @FXML
     private void handleBackButton() throws IOException {

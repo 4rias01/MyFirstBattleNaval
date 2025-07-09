@@ -1,5 +1,6 @@
 package com.example.myfirstnavalbattle.controller;
 
+import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 import com.example.myfirstnavalbattle.model.Characters;
 import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.SceneManager;
@@ -29,6 +30,7 @@ public class HomeController {
 
     @FXML
     private void handlePlay() throws IOException {
+        Ship.shipsCount = 0;
         SceneManager.switchScene("SetupScene");
     }
 

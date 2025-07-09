@@ -8,13 +8,13 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             stylesheets="@GameSceneStyle.css"
-            styleClass="anchorpane"
+            styleClass="AnchorPane"
             fx:controller="com.example.myfirstnavalbattle.controller.GameController"
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="400.0" prefWidth="600.0">
 
-    <GridPane fx:id="gameGrid"
-              layoutX="200" layoutY="120" styleClass="gridpane">
+    <GridPane fx:id="gridPaneGame"
+              layoutX="200" layoutY="120" styleClass="GridPane">
     </GridPane>
 
     <Button layoutY="20" layoutX="20"

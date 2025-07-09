@@ -1,4 +1,4 @@
-.anchorpane{
+.AnchorPane{
     -fx-background-image: url("../../Images/backgrounds/backgroundGame.jpg");
     -fx-background-size: cover; /* o contain, según prefieras */
     -fx-background-position: center center;
@@ -6,7 +6,7 @@
     -fx-pref-height: 690;
 }
 
-.gridpane{
+.GridPane{
     -fx-border-radius: 5px;
     -fx-border-width: 5px;
     -fx-border-color: white;
