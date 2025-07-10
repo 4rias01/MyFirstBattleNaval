@@ -23,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class SetupController {
     @FXML
@@ -37,16 +38,19 @@ public class SetupController {
     private TextField userNameTextField;
 
     private Characters actualCharacter;
-    private static GridPane gridPaneGame;
 
     private final int CELL_SIZE = 50;
-    private final int GRID_SIZE = 10;
+    public final static int GRID_SIZE = 10;
 
-    private static Cell[][] cells = null;
+    private Cell[][] cells = null;
+    private ArrayList<Ship> ships = null;
 
 
     @FXML
     public void initialize() {
+        ships = new ArrayList<>();
+        cells = new Cell[GRID_SIZE][GRID_SIZE];
+
         initGridPane();
         initShips();
         initUserInfo();
@@ -91,7 +95,6 @@ public class SetupController {
 
     @FXML
     private void initGridPane() {
-        cells = new Cell[GRID_SIZE][GRID_SIZE];
 
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
@@ -124,7 +127,7 @@ public class SetupController {
         int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 2
         int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
 
-        boolean canBePlace = canBePlaced(targetRow, targetCol, ship);
+        boolean canBePlace = canBePlaced(targetRow, targetCol, vertical, size);
 
         if (canBePlace && ship.getParent() instanceof GridPane) {
             int oldRow, oldCol;
@@ -146,20 +149,22 @@ public class SetupController {
 
 
     private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status, Ship ship) {
-        if (vertical) {
-            for (int targetRow = row; targetRow < row + size; targetRow++) {
-                Cell cell = getCell(targetRow,col);
-                assert cell != null;
-                cell.setStatus(status);
-                cell.setShip(ship);
+        int init = vertical? row : col; // variable que ira iterando el for.
+        // Si es vertical, itera el row y col permanece fijo
+        // si es horizontal, el row permanece fijo y itera el col
+
+        for (int target = init; target < init + size; target++) {
+
+            Cell cell;
+            if (vertical) {
+                cell = getCell(target, col); //iteras el row
             }
-        } else {
-            for (int targetCol = col; targetCol < col + size; targetCol++) {
-                Cell cell = getCell(row, targetCol);
-                assert cell != null;
-                cell.setStatus(status);
-                cell.setShip(ship);
+            else{
+                cell = getCell(row, target); //iteras el col
             }
+            assert cell != null;
+            cell.setStatus(status);
+            cell.setShip(ship);
         }
     }
 
@@ -173,22 +178,21 @@ public class SetupController {
         GridPane.setRowSpan(ship, spanRows);
     }
 
+    private boolean canBePlaced(int row, int col, boolean vertical, int size) {
+        int init = vertical ? row : col;
+        for (int target = init; target < init + size; target++) {
 
-
-
-    private boolean canBePlaced(int row, int col, Ship ship) {
-        int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 4
-        int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
-
-        for (int targetRow = row; targetRow < row + spanRows; targetRow++) {
-            for (int targetCol = col; targetCol < col + spanCols; targetCol++) {
-
-                Cell cell = getCell(targetRow, targetCol);
-                if (cell == null) { return false; }
-                if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+            Cell cell;
+            if (vertical) {
+                cell = getCell(target,col);
             }
-        }
+            else {
+                cell = getCell(row,target);
+            }
 
+            if (cell == null) { return false; }
+            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+        }
         return true;
     }
 
@@ -200,6 +204,7 @@ public class SetupController {
         shipOnDragListener(ship);
         clickOnShipListener(ship);
         hBox.getChildren().add(ship);
+        ships.add(ship);
     }
 
     private void shipOnDragListener(Ship ship) {
@@ -262,7 +267,7 @@ public class SetupController {
             }
             if (Ship.currentlyDraggedShip != null) {
                 Ship ship = Ship.currentlyDraggedShip;
-                if (canBePlaced(cell.getRow(), cell.getCol(), ship)) {
+                if (canBePlaced(cell.getRow(), cell.getCol(), ship.isVertical(), ship.getSize())) {
                     setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER, null);
                 }
             }
@@ -306,9 +311,6 @@ public class SetupController {
         return cells[row][col];
     }
 
-    public int getSize(){
-        return GRID_SIZE;
-    }
 
     @FXML
     private void handleBackButton() throws IOException {
@@ -317,7 +319,7 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-        Board board = new Board(gridpane, cells);
+        Board board = new Board(cells, ships);
         GameController.setBoard(board);
         actualCharacter.setUsername(userNameTextField.getText());
         SceneManager.switchScene("GameScene");

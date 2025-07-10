@@ -13,7 +13,6 @@ public class Ship extends Rectangle {
     private ImagePattern imageVertical;
     private ImagePattern imageHorizontal;
 
-    public static int shipsCount = 0;
     private boolean vertical;
     private int size;
 
@@ -44,9 +43,8 @@ public class Ship extends Rectangle {
             default:
                 System.out.println("Error, numero invalido");
         }
-        setWidth(50);
+        setWidth(48);
         vertical = true;
-        shipsCount++;
     }
 
     private void setImages(int numImage){
@@ -80,8 +78,8 @@ public class Ship extends Rectangle {
                         "/com/example/myfirstnavalbattle/Images/ships/SIZE_"+ size +"_"+rotation+".png"))));
     }
 
-    private ImagePattern getCurrentImage(){
-        return currentImage;
+    public Image getImage(){
+        return currentImage.getImage();
     }
 
     public boolean isVertical() {
