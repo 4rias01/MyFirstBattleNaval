@@ -14,12 +14,10 @@ public class Board {
 
     ModelCell[][] iaCells;
     ArrayList<Ship> iaShips;
-    GridPane gridPane;
     int size;
 
 
-    public Board(GridPane grid, Cell[][] setupCells, ArrayList<Ship> setupShips) {
-        gridPane = grid;
+    public Board(Cell[][] setupCells, ArrayList<Ship> setupShips) {
         size = SetupController.GRID_SIZE;
 
         playerCells = new ModelCell[size][size];
@@ -33,8 +31,8 @@ public class Board {
     }
 
     private void initPlayerBoard(Cell[][] setupCellsArray, ArrayList<Ship> setupShips) {
-        for (int row = 0; row < setupCellsArray.length; row++) {
-            for (int col = 0; col < setupCellsArray[row].length; col++) {
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
 
                 ModelCell modelCell = new ModelCell(setupCellsArray[row][col]);
                 playerCells[row][col] = modelCell;
@@ -71,7 +69,6 @@ public class Board {
                     if (ship.isVertical() != vertical) {
                         ship.rotateShip();
                     }
-
                     ship.setUserData( new int[] {row, col});
                     setModelCellsState(ship, row, col, size, vertical, ModelCell.Status.SHIP);
                     break;
@@ -127,7 +124,7 @@ public class Board {
 
         if (iaCell.getStatus() == ModelCell.Status.EMPTY) {
             iaCell.setStatus(ModelCell.Status.MISS);
-            return ModelCell.Status.MISS    ;
+            return ModelCell.Status.MISS;
         }
         else{
             iaCell.setStatus(ModelCell.Status.HIT);

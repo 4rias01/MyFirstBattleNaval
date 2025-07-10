@@ -15,6 +15,8 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class GameController {
 
@@ -41,13 +43,14 @@ public class GameController {
     @FXML
     public void initialize() {
 
-        gridPanePlayer.setPrefSize(500, 500);
-        gridPanePlayer.setMaxSize(500, 500);
-        gridPanePlayer.setMinSize(500, 500);
+        int gridSizes = 450;
+        gridPanePlayer.setPrefSize(gridSizes, gridSizes);
+        gridPanePlayer.setMaxSize(gridSizes, gridSizes);
+        gridPanePlayer.setMinSize(gridSizes, gridSizes);
 
-        gridPaneIA.setPrefSize(500, 500);
-        gridPaneIA.setMaxSize(500, 500);
-        gridPaneIA.setMinSize(500, 500);
+        gridPaneIA.setPrefSize(gridSizes, gridSizes);
+        gridPaneIA.setMaxSize(gridSizes, gridSizes);
+        gridPaneIA.setMinSize(gridSizes, gridSizes);
 
         addListenerToScene(anchorPane);
         int size = SetupController.GRID_SIZE;
@@ -66,12 +69,14 @@ public class GameController {
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
 
+                int stackSize = 45;
+
                 StackPane stackPanePlayer = new StackPane();
-                stackPanePlayer.setPrefSize(50,50);
+                stackPanePlayer.setPrefSize(stackSize,stackSize);
                 stackPanePlayer.getStyleClass().add("StackPane");
 
                 StackPane stackPaneIA = new StackPane();
-                stackPaneIA.setPrefSize(50,50);
+                stackPaneIA.setPrefSize(stackSize,stackSize);
                 stackPaneIA.getStyleClass().add("StackPane");
                 stackPaneListener(stackPaneIA);
                 stackPaneIA.setUserData(new int[]{row, col});
@@ -99,6 +104,7 @@ public class GameController {
 
             putShipImage(playerShip, gridPanePlayer, playerShipImage);
             putShipImage(iaShip, gridPaneIA, iaShipImage);
+
         }
         setIAView(false);
     }
@@ -112,8 +118,8 @@ public class GameController {
         boolean vertical = ship.isVertical();
         int size = ship.getSize();
 
-        int width = 48;
-        int height = (50*size)-10;
+        int width = 43;
+        int height = (45*size)-10;
 
         gridPane.add(shipImage, col, row);
         if (vertical) {
@@ -128,6 +134,7 @@ public class GameController {
             GridPane.setColumnSpan(shipImage, size);
             GridPane.setRowSpan(shipImage, 1);
         }
+        shipImage.setUserData(coords);
     }
 
     private void stackPaneListener(StackPane stackPane) {
@@ -137,7 +144,7 @@ public class GameController {
             stackPane.setDisable(true);
 
             int[] coords = (int[]) stackPane.getUserData();
-            ModelCell.Status status= board.shoot(coords[0], coords[1]);
+            ModelCell.Status status = board.shoot(coords[0], coords[1]);
 
             if (status == ModelCell.Status.MISS) {
                 stackPane.getStyleClass().add("water");
@@ -151,6 +158,7 @@ public class GameController {
                 int row = targetCoords[0];
                 int col = targetCoords[1];
 
+                setImageVisibility(row, col);
                 setStackPaneState(targetShip, row, col, targetShip.getSize(), targetShip.isVertical());
             }
         });
@@ -163,17 +171,17 @@ public class GameController {
 
             StackPane stackPane;
             if (vertical) {
-                stackPane = getIAStacPane(target, col); //iteras el row
+                stackPane = getIAStackPane(target, col); //iteras el row
             }
             else{
-                stackPane = getIAStacPane(row, target); //iteras el col
+                stackPane = getIAStackPane(row, target); //iteras el col
             }
             assert stackPane != null;
             stackPane.getStyleClass().add("killed");
         }
     }
 
-    private StackPane getIAStacPane(int row, int col) {
+    private StackPane getIAStackPane(int row, int col) {
         return iaBoardStackPanes[row][col];
     }
 
@@ -193,11 +201,24 @@ public class GameController {
         }
     }
 
+    private void setImageVisibility(int row, int col) {
+        int[] coords = new int[]{row, col};
+        for (ImageView imageView : iaShipsImageView) {
+
+            int[] imageCoords = (int[]) imageView.getUserData();
+            if (Arrays.equals(coords, imageCoords)) {
+                imageView.setVisible(true);
+                iaShipsImageView.remove(imageView);
+                break;
+            }
+        }
+    }
+
     private void addListenerToScene(AnchorPane pane) {
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-                    if (event.isControlDown() && event.getCode() == KeyCode.S) {
+                    if (event.isControlDown() && event.getCode() == KeyCode.S && !iaShipsImageView.isEmpty()) {
                         setIAView(!iaShipsImageView.get(0).isVisible());
                         event.consume();
                     }

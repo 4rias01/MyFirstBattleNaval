@@ -319,7 +319,7 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-        Board board = new Board(gridpane, cells, ships);
+        Board board = new Board(cells, ships);
         GameController.setBoard(board);
         actualCharacter.setUsername(userNameTextField.getText());
         SceneManager.switchScene("GameScene");
