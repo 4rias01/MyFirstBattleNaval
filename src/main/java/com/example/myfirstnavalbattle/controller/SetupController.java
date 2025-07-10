@@ -26,24 +26,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class SetupController {
-    @FXML
-    private GridPane gridpane;
-    @FXML
-    private HBox hBox;
-    @FXML
-    private Button readyButton;
-    @FXML
-    private ImageView characterImage;
-    @FXML
-    private TextField userNameTextField;
-
+    private Cell[][] cells = null;
+    private ArrayList<Ship> ships = null;
     private Characters actualCharacter;
-
     private final int CELL_SIZE = 50;
     public final static int GRID_SIZE = 10;
 
-    private Cell[][] cells = null;
-    private ArrayList<Ship> ships = null;
+    private Ship currentShip;
+    private boolean currentShipIsVertical;
+    private int currentShipRow;
+    private int currentShipCol;
+    private int currentShipSize;
+
+    @FXML private GridPane gridpane;
+    @FXML private HBox hBox;
+    @FXML private Button readyButton;
+    @FXML private ImageView characterImage;
+    @FXML private TextField userNameTextField;
 
 
     @FXML
@@ -117,50 +116,43 @@ public class SetupController {
     @FXML
     private void dropShipInCell(Cell cell) {
 
-        Ship ship = Ship.currentlyDraggedShip;
-        int size = ship.getSize();
-        boolean vertical = ship.isVertical();
 
         int targetRow = cell.getRow();
         int targetCol = cell.getCol();
 
-        int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 2
-        int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
+        boolean canBePlace = canBePlaced(targetRow, targetCol);
 
-        boolean canBePlace = canBePlaced(targetRow, targetCol, vertical, size);
+        if (canBePlace && currentShip.getParent() instanceof GridPane) {
+            setCellState(Cell.Status.EMPTY, null);
+            currentShip.setUserData(new int[]{targetRow, targetCol});
+            setCurrentShipLocation();
 
-        if (canBePlace && ship.getParent() instanceof GridPane) {
-            int oldRow, oldCol;
-            int[] coords = (int[]) ship.getUserData();
-            oldRow = coords[0];
-            oldCol = coords[1];
-            setCellState(oldRow, oldCol, size, vertical, Cell.Status.EMPTY, null);
-
-            ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
-            placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
+            setCellState(Cell.Status.SHIP, currentShip);
+            placeShipInGridPane();
         } else if (canBePlace) {
-            ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
-            placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
+            currentShip.setUserData(new int[]{targetRow, targetCol});
+            setCurrentShipLocation();
+
+            setCellState(Cell.Status.SHIP, currentShip);
+            placeShipInGridPane();
         }
 
     }
 
 
-    private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status, Ship ship) {
-        int init = vertical? row : col; // variable que ira iterando el for.
+    private void setCellState(Cell.Status status, Ship ship) {
+        int init = currentShipIsVertical? currentShipRow : currentShipCol; // variable que ira iterando el for.
         // Si es vertical, itera el row y col permanece fijo
         // si es horizontal, el row permanece fijo y itera el col
 
-        for (int target = init; target < init + size; target++) {
+        for (int target = init; target < init + currentShipSize; target++) {
 
             Cell cell;
-            if (vertical) {
-                cell = getCell(target, col); //iteras el row
+            if (currentShipIsVertical) {
+                cell = getCell(target, currentShipCol); //iteras el row
             }
             else{
-                cell = getCell(row, target); //iteras el col
+                cell = getCell(currentShipRow, target); //iteras el col
             }
             assert cell != null;
             cell.setStatus(status);
@@ -168,22 +160,29 @@ public class SetupController {
         }
     }
 
-    @FXML
-    private void placeShipInGridPane(Ship ship, int col, int row, int spanCols, int spanRows) {
-        if (ship.getParent() != null) {
-            ((Pane) ship.getParent()).getChildren().remove(ship);
+    private void placeShipInGridPane(){
+        if (currentShip.getParent() != null){
+            ((Pane) currentShip.getParent()).getChildren().remove(currentShip);
         }
-        gridpane.add(ship, col, row);
-        GridPane.setColumnSpan(ship, spanCols);
-        GridPane.setRowSpan(ship, spanRows);
+
+        if (currentShipIsVertical){
+            gridpane.add(currentShip, currentShipCol, currentShipRow);
+            GridPane.setRowSpan(currentShip, currentShipSize);
+            GridPane.setColumnSpan(currentShip, 1);
+        }
+        else{
+            gridpane.add(currentShip, currentShipCol, currentShipRow);
+            GridPane.setRowSpan(currentShip, 1);
+            GridPane.setColumnSpan(currentShip, currentShipSize);
+        }
     }
 
-    private boolean canBePlaced(int row, int col, boolean vertical, int size) {
-        int init = vertical ? row : col;
-        for (int target = init; target < init + size; target++) {
+    private boolean canBePlaced(int row, int col) {
+        int init = currentShipIsVertical ? row : col;
+        for (int target = init; target < init + currentShipSize; target++) {
 
             Cell cell;
-            if (vertical) {
+            if (currentShipIsVertical) {
                 cell = getCell(target,col);
             }
             else {
@@ -222,7 +221,8 @@ public class SetupController {
             else { db.setDragView(snapshot, 25, snapshot.getHeight() / 2 );}
 
             db.setContent(content);
-            Ship.currentlyDraggedShip = ship;
+            currentShip = ship;
+            setCurrenShipAttributes();
 
             event.consume();
         });
@@ -237,19 +237,14 @@ public class SetupController {
                 }
             }
             if (event.getClickCount() == 2 && ship.getParent() instanceof GridPane) {
+                currentShip = ship;
+                setCurrenShipAttributes();
+                setCurrentShipLocation();
 
-                int[] coords = (int[]) ship.getUserData();
-                boolean vertical = ship.isVertical();
-                int size = ship.getSize();
-                int row, col;
-
-                row = coords[0];
-                col = coords[1];
-
-                setCellState(row, col, size, vertical, Cell.Status.EMPTY, null);
-
+                setCellState(Cell.Status.EMPTY, null);
                 ((Pane) ship.getParent()).getChildren().remove(ship);
-                if (!vertical) {
+
+                if (!currentShipIsVertical) {
                     ship.rotateShip();
                 }
                 hBox.getChildren().add(ship);
@@ -265,19 +260,20 @@ public class SetupController {
             if (event.getGestureSource() != this && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
-            if (Ship.currentlyDraggedShip != null) {
-                Ship ship = Ship.currentlyDraggedShip;
-                if (canBePlaced(cell.getRow(), cell.getCol(), ship.isVertical(), ship.getSize())) {
-                    setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER, null);
+            if (currentShip != null) {
+                currentShip.setUserData(new int[] {cell.getRow(), cell.getCol()});
+                setCurrenShipAttributes();
+                setCurrentShipLocation();
+                if (canBePlaced(cell.getRow(), cell.getCol())) {
+                    setCellState(Cell.Status.OVER, null);
                 }
             }
             event.consume();
         });
         cell.setOnDragExited(event -> {
-            if (Ship.currentlyDraggedShip != null && cell.getStatus() == Cell.Status.OVER) {
-                Ship ship = Ship.currentlyDraggedShip;
-                setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.EMPTY, null);
-
+            setCurrenShipAttributes();
+            if (currentShip != null && cell.getStatus() == Cell.Status.OVER) {
+                setCellState(Cell.Status.EMPTY, null);
             }
         });
     }
@@ -341,6 +337,17 @@ public class SetupController {
             userNameTextField.setVisible(false);
             userNameTextField.setText("");
         }
+    }
+
+    private void setCurrenShipAttributes(){
+        currentShipSize = currentShip.getSize();
+        currentShipIsVertical = currentShip.isVertical();
+    }
+
+    private void setCurrentShipLocation(){
+        int[] coords = (int[]) currentShip.getUserData();
+        currentShipRow = coords[0];
+        currentShipCol = coords[1];
     }
 
 }
