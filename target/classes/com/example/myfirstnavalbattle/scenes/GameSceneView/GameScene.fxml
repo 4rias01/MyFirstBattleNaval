@@ -9,12 +9,13 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             stylesheets="@GameSceneStyle.css"
             styleClass="AnchorPane"
+            fx:id="anchorPane"
             fx:controller="com.example.myfirstnavalbattle.controller.GameController"
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="400.0" prefWidth="600.0">
 
     <GridPane fx:id="gridPaneIA"
-              layoutX="200" layoutY="120">
+              layoutX="200" layoutY="120" styleClass="GridPane">
     </GridPane>
 
     <GridPane fx:id="gridPanePlayer"

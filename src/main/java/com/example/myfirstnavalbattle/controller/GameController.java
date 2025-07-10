@@ -7,6 +7,9 @@ import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
@@ -23,6 +26,9 @@ public class GameController {
     private GridPane gridPaneIA;
     private ArrayList<Ship> iaShips = null;
     private ArrayList<ImageView> iaShipsImageView = null;
+
+    @FXML
+    AnchorPane anchorPane;
 
     private static Board board;
 
@@ -41,29 +47,13 @@ public class GameController {
         gridPaneIA.setMaxSize(500, 500);
         gridPaneIA.setMinSize(500, 500);
 
+        addListenerToScene(anchorPane);
+
         playerShips = board.getPlayerShips();
         iaShips = board.getIAShips();
         iaShipsImageView = new ArrayList<>();
         initGridPanes();
         initShips();
-
-        /*
-        for (int x=0; x<cells.length; x++) {
-            for (int y=0; y<cells[x].length; y++) {
-
-                ModelCell mdc = modelCells[x][y];
-
-                if(mdc.getStatus()== ModelCell.Status.SHIP){
-
-                    System.out.println("SHIP IN: "+ mdc.getRow()+"-"+mdc.getCol());
-                    System.out.println("SHIP SIZE: " + mdc.getShip().getSize());
-
-                } else if (mdc.getStatus()==null) {
-
-                    System.out.println("ERROR, MODEL CELLS SIN STATUS");
-                }
-            }
-        }*/
 
     }
 
@@ -93,28 +83,27 @@ public class GameController {
     }
 
     private void initShips(){
-
         for (int index = 0; index < iaShips.size(); index++) {
             Ship playerShip = playerShips.get(index);
             Ship iaShip = iaShips.get(index);
 
-            putShipImage(playerShip, gridPanePlayer);
-            putShipImage(iaShip, gridPaneIA);
+            ImageView playerShipImage = new ImageView(playerShip.getImage());
             ImageView iaShipImage = new ImageView(iaShip.getImage());
             iaShipsImageView.add(iaShipImage);
+
+            putShipImage(playerShip, gridPanePlayer, playerShipImage);
+            putShipImage(iaShip, gridPaneIA, iaShipImage);
         }
+        setIAView(false);
     }
 
-    private void putShipImage(Ship ship, GridPane gridPane) {
+    private void putShipImage(Ship ship, GridPane gridPane, ImageView shipImage) {
         int[] coords = (int[]) ship.getUserData();
         int row = coords[0];
         int col = coords[1];
 
         boolean vertical = ship.isVertical();
         int size = ship.getSize();
-        Image image = ship.getImage();
-        ImageView shipImage = new ImageView(image);
-        shipImage.setMouseTransparent(true);
 
         int width = 48;
         int height = (50*size)-10;
@@ -148,5 +137,24 @@ public class GameController {
     @FXML
     private void handleBackButton() throws IOException {
         SceneManager.switchScene("HomeScene");
+    }
+
+    private void setIAView(boolean show){
+        for (ImageView imageView : iaShipsImageView) {
+            imageView.setVisible(show);
+        }
+    }
+
+    private void addListenerToScene(AnchorPane pane) {
+        pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                    if (event.isControlDown() && event.getCode() == KeyCode.S) {
+                        setIAView(!iaShipsImageView.get(0).isVisible());
+                        event.consume();
+                    }
+                });
+            }
+        });
     }
 }
