@@ -15,11 +15,12 @@ public class Board {
     ModelCell[][] iaCells;
     ArrayList<Ship> iaShips;
     GridPane gridPane;
+    int size;
 
 
     public Board(GridPane grid, Cell[][] setupCells, ArrayList<Ship> setupShips) {
         gridPane = grid;
-        int size = SetupController.GRID_SIZE;
+        size = SetupController.GRID_SIZE;
 
         playerCells = new ModelCell[size][size];
         playerShips = new ArrayList<>();
@@ -55,26 +56,48 @@ public class Board {
             }
         }
 
-        //generateIABoard();
+        generateIABoard();
     }
 
     private void generateIABoard() {
         for (Ship ship : iaShips) {
-            boolean placed = false;
-
             int size = ship.getSize();
 
-            while (!placed) {
+            while (true) {
                 boolean vertical = Math.random() < 0.5;
                 int row = (int)(Math.random() * 10);
                 int col = (int)(Math.random() * 10);
                 if (canBePlaceShipInIA(row, col, vertical, size)) {
-                    /*TODO: function to place IAship in IAboard
-                    * TODO: function to change ModelCell status
-                    * */
-                    placed = true;
+
+                    if (ship.isVertical() != vertical) {
+                        ship.rotateShip();
+                    }
+
+                    ship.setUserData( new int[] {row, col});
+                    setModelCellsState(ship, row, col, size, vertical);
+                    break;
                 }
             }
+        }
+    }
+
+    private void setModelCellsState(Ship ship, int row, int col, int size, boolean vertical) {
+        int init = vertical? row : col; // variable que ira iterando el for.
+        // Si es vertical, itera el row y col permanece fijo
+        // si es horizontal, el row permanece fijo y itera el col
+
+        for (int target = init; target < init + size; target++) {
+
+            ModelCell cell;
+            if (vertical) {
+                cell = getIACell(target, col); //iteras el row
+            }
+            else{
+                cell = getIACell(row, target); //iteras el col
+            }
+            assert cell != null;
+            cell.setStatus(ModelCell.Status.SHIP);
+            cell.setShip(ship);
         }
     }
 
@@ -114,11 +137,14 @@ public class Board {
     }
 
     public ModelCell getIACell(int row, int col) {
+        if (row >= size || col >= size) {
+            return null;
+        }
         return iaCells[row][col];
     }
 
-    public ModelCell[][] getCellsArray() {
-        return playerCells;
+    public ArrayList<Ship> getIAShips() {
+        return iaShips;
     }
 
 }

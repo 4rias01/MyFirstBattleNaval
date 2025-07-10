@@ -17,7 +17,12 @@ public class GameController {
 
     @FXML
     private GridPane gridPanePlayer;
-    private ArrayList<Ship> shipsArray = null;
+    private ArrayList<Ship> playerShips = null;
+
+    @FXML
+    private GridPane gridPaneIA;
+    private ArrayList<Ship> iaShips = null;
+    private ArrayList<ImageView> iaShipsImageView = null;
 
     private static Board board;
 
@@ -32,9 +37,15 @@ public class GameController {
         gridPanePlayer.setMaxSize(500, 500);
         gridPanePlayer.setMinSize(500, 500);
 
-        shipsArray = board.getPlayerShips();
-        initGridPaneGame();
-        initPlayerShips();
+        gridPaneIA.setPrefSize(500, 500);
+        gridPaneIA.setMaxSize(500, 500);
+        gridPaneIA.setMinSize(500, 500);
+
+        playerShips = board.getPlayerShips();
+        iaShips = board.getIAShips();
+        iaShipsImageView = new ArrayList<>();
+        initGridPanes();
+        initShips();
 
         /*
         for (int x=0; x<cells.length; x++) {
@@ -56,20 +67,70 @@ public class GameController {
 
     }
 
-    private void initGridPaneGame() {
+    private void initGridPanes() {
         int size = SetupController.GRID_SIZE;
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
 
-                StackPane stackPane = new StackPane();
-                stackPane.setPrefSize(50,50);
-                stackPane.getStyleClass().add("StackPane");
-                stackPaneListener(stackPane);
+                StackPane stackPanePlayer = new StackPane();
+                stackPanePlayer.setPrefSize(50,50);
+                stackPanePlayer.getStyleClass().add("StackPane");
 
-                GridPane.setRowIndex(stackPane, row);
-                GridPane.setColumnIndex(stackPane, col);
-                gridPanePlayer.getChildren().add(stackPane);
+                StackPane stackPaneIA = new StackPane();
+                stackPaneIA.setPrefSize(50,50);
+                stackPaneIA.getStyleClass().add("StackPane");
+                stackPaneListener(stackPaneIA);
+
+                GridPane.setRowIndex(stackPanePlayer, row);
+                GridPane.setColumnIndex(stackPanePlayer, col);
+                gridPanePlayer.getChildren().add(stackPanePlayer);
+
+                GridPane.setRowIndex(stackPaneIA, row);
+                GridPane.setColumnIndex(stackPaneIA, col);
+                gridPaneIA.getChildren().add(stackPaneIA);
             }
+        }
+    }
+
+    private void initShips(){
+
+        for (int index = 0; index < iaShips.size(); index++) {
+            Ship playerShip = playerShips.get(index);
+            Ship iaShip = iaShips.get(index);
+
+            putShipImage(playerShip, gridPanePlayer);
+            putShipImage(iaShip, gridPaneIA);
+            ImageView iaShipImage = new ImageView(iaShip.getImage());
+            iaShipsImageView.add(iaShipImage);
+        }
+    }
+
+    private void putShipImage(Ship ship, GridPane gridPane) {
+        int[] coords = (int[]) ship.getUserData();
+        int row = coords[0];
+        int col = coords[1];
+
+        boolean vertical = ship.isVertical();
+        int size = ship.getSize();
+        Image image = ship.getImage();
+        ImageView shipImage = new ImageView(image);
+        shipImage.setMouseTransparent(true);
+
+        int width = 48;
+        int height = (50*size)-10;
+
+        gridPane.add(shipImage, col, row);
+        if (vertical) {
+            shipImage.setFitHeight(height);
+            shipImage.setFitWidth(width);
+            GridPane.setColumnSpan(shipImage, 1);
+            GridPane.setRowSpan(shipImage, size);
+        }
+        else{
+            shipImage.setFitHeight(width);
+            shipImage.setFitWidth(height);
+            GridPane.setColumnSpan(shipImage, size);
+            GridPane.setRowSpan(shipImage, 1);
         }
     }
 
@@ -79,41 +140,6 @@ public class GameController {
         });
     }
 
-    private void initPlayerShips(){
-        for (Ship ship : shipsArray) {
-
-            int[] coords = (int[]) ship.getUserData();
-            int row = coords[0];
-            int col = coords[1];
-
-            boolean vertical = ship.isVertical();
-            int size = ship.getSize();
-            Image image = ship.getImage();
-            ImageView shipImage = new ImageView(image);
-            shipImage.setMouseTransparent(true);
-
-            putShipImage(row, col, shipImage, vertical, size);
-        }
-    }
-
-    private void putShipImage(int row, int col, ImageView image, boolean vertical, int size) {
-        int width = 48;
-        int height = (50*size)-10;
-
-        gridPanePlayer.add(image, col, row);
-        if (vertical) {
-            image.setFitHeight(height);
-            image.setFitWidth(width);
-            GridPane.setColumnSpan(image, 1);
-            GridPane.setRowSpan(image, size);
-        }
-        else{
-            image.setFitHeight(width);
-            image.setFitWidth(height);
-            GridPane.setColumnSpan(image, size);
-            GridPane.setRowSpan(image, 1);
-        }
-    }
 
     public static void setBoard(Board board) {
         GameController.board = board;

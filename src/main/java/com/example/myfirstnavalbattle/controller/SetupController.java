@@ -149,20 +149,22 @@ public class SetupController {
 
 
     private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status, Ship ship) {
-        if (vertical) {
-            for (int targetRow = row; targetRow < row + size; targetRow++) {
-                Cell cell = getCell(targetRow,col);
-                assert cell != null;
-                cell.setStatus(status);
-                cell.setShip(ship);
+        int init = vertical? row : col; // variable que ira iterando el for.
+        // Si es vertical, itera el row y col permanece fijo
+        // si es horizontal, el row permanece fijo y itera el col
+
+        for (int target = init; target < init + size; target++) {
+
+            Cell cell;
+            if (vertical) {
+                cell = getCell(target, col); //iteras el row
             }
-        } else {
-            for (int targetCol = col; targetCol < col + size; targetCol++) {
-                Cell cell = getCell(row, targetCol);
-                assert cell != null;
-                cell.setStatus(status);
-                cell.setShip(ship);
+            else{
+                cell = getCell(row, target); //iteras el col
             }
+            assert cell != null;
+            cell.setStatus(status);
+            cell.setShip(ship);
         }
     }
 

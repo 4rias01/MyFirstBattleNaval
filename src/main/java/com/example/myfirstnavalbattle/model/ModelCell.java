@@ -18,7 +18,7 @@ public class ModelCell {
 
     private final int row;
     private final int col;
-    private final Ship ship;
+    private Ship ship;
 
 
     public ModelCell(Cell cell) {
@@ -47,6 +47,7 @@ public class ModelCell {
     public Ship getShip() {
         return ship;
     }
+    public void setShip(Ship ship) { this.ship = ship; }
 
     public Status getStatus() { return status; }
     public int getRow() { return row; }
