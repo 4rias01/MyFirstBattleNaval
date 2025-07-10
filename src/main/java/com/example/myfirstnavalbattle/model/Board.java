@@ -55,7 +55,6 @@ public class Board {
                 iaCells[row][col] = iaCell;
             }
         }
-
         generateIABoard();
     }
 
@@ -74,30 +73,10 @@ public class Board {
                     }
 
                     ship.setUserData( new int[] {row, col});
-                    setModelCellsState(ship, row, col, size, vertical);
+                    setModelCellsState(ship, row, col, size, vertical, ModelCell.Status.SHIP);
                     break;
                 }
             }
-        }
-    }
-
-    private void setModelCellsState(Ship ship, int row, int col, int size, boolean vertical) {
-        int init = vertical? row : col; // variable que ira iterando el for.
-        // Si es vertical, itera el row y col permanece fijo
-        // si es horizontal, el row permanece fijo y itera el col
-
-        for (int target = init; target < init + size; target++) {
-
-            ModelCell cell;
-            if (vertical) {
-                cell = getIACell(target, col); //iteras el row
-            }
-            else{
-                cell = getIACell(row, target); //iteras el col
-            }
-            assert cell != null;
-            cell.setStatus(ModelCell.Status.SHIP);
-            cell.setShip(ship);
         }
     }
 
@@ -119,13 +98,79 @@ public class Board {
         return true;
     }
 
+    private void setModelCellsState(Ship ship, int row, int col, int size, boolean vertical, ModelCell.Status status) {
+        int init = vertical? row : col; // variable que ira iterando el for.
+        // Si es vertical, itera el row y col permanece fijo
+        // si es horizontal, el row permanece fijo y itera el col
+
+        for (int target = init; target < init + size; target++) {
+
+            ModelCell cell;
+            if (vertical) {
+                cell = getIACell(target, col); //iteras el row
+            }
+            else{
+                cell = getIACell(row, target); //iteras el col
+            }
+            assert cell != null;
+            cell.setStatus(status);
+            cell.setShip(ship);
+        }
+    }
+
     private void initPlayerShips(ArrayList<Ship> setupShips) {
         playerShips.addAll(setupShips);
     }
 
+    public ModelCell.Status shoot(int row, int col) {
+        ModelCell iaCell = getIACell(row, col);
+
+        if (iaCell.getStatus() == ModelCell.Status.EMPTY) {
+            iaCell.setStatus(ModelCell.Status.MISS);
+            return ModelCell.Status.MISS    ;
+        }
+        else{
+            iaCell.setStatus(ModelCell.Status.HIT);
+            Ship targetShip = iaCell.getShip();
+            int[] coords = (int[]) targetShip.getUserData();
+            int shipRow = coords[0];
+            int shipCol = coords[1];
+            boolean vertical = targetShip.isVertical();
+            int size = targetShip.getSize();
+
+            if(isShipAlive(targetShip, shipRow, shipCol, vertical, size)) {
+                return ModelCell.Status.HIT;
+            }
+            else{
+                setModelCellsState(targetShip, shipRow, shipCol, size, vertical, ModelCell.Status.KILLED);
+                return ModelCell.Status.KILLED;
+            }
+        }
+    }
+
+    private boolean isShipAlive(Ship ship, int row, int col, boolean vertical, int size) {
+        int init = vertical? row : col;
+
+        for (int target = init; target < init + size; target++) {
+
+            ModelCell cell;
+            if (vertical) {
+                cell = getIACell(target, col);
+            }
+            else{
+                cell = getIACell(row, target);
+            }
+            assert cell != null;
+
+            if (cell.getStatus() == ModelCell.Status.SHIP) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Ship getShip(int row, int col) {
-        return getPlayerCell(row, col).getShip();
+        return getIACell(row, col).getShip();
     }
 
     public ArrayList<Ship> getPlayerShips() {

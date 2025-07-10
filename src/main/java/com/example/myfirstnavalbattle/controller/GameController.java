@@ -3,9 +3,9 @@ package com.example.myfirstnavalbattle.controller;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 import com.example.myfirstnavalbattle.model.Board;
+import com.example.myfirstnavalbattle.model.ModelCell;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -26,6 +26,8 @@ public class GameController {
     private GridPane gridPaneIA;
     private ArrayList<Ship> iaShips = null;
     private ArrayList<ImageView> iaShipsImageView = null;
+
+    private StackPane[][] iaBoardStackPanes = null;
 
     @FXML
     AnchorPane anchorPane;
@@ -48,6 +50,8 @@ public class GameController {
         gridPaneIA.setMinSize(500, 500);
 
         addListenerToScene(anchorPane);
+        int size = SetupController.GRID_SIZE;
+        iaBoardStackPanes = new StackPane[size][size];
 
         playerShips = board.getPlayerShips();
         iaShips = board.getIAShips();
@@ -70,6 +74,7 @@ public class GameController {
                 stackPaneIA.setPrefSize(50,50);
                 stackPaneIA.getStyleClass().add("StackPane");
                 stackPaneListener(stackPaneIA);
+                stackPaneIA.setUserData(new int[]{row, col});
 
                 GridPane.setRowIndex(stackPanePlayer, row);
                 GridPane.setColumnIndex(stackPanePlayer, col);
@@ -78,6 +83,7 @@ public class GameController {
                 GridPane.setRowIndex(stackPaneIA, row);
                 GridPane.setColumnIndex(stackPaneIA, col);
                 gridPaneIA.getChildren().add(stackPaneIA);
+                iaBoardStackPanes[row][col] = stackPaneIA;
             }
         }
     }
@@ -98,6 +104,7 @@ public class GameController {
     }
 
     private void putShipImage(Ship ship, GridPane gridPane, ImageView shipImage) {
+        shipImage.setMouseTransparent(true);
         int[] coords = (int[]) ship.getUserData();
         int row = coords[0];
         int col = coords[1];
@@ -125,8 +132,49 @@ public class GameController {
 
     private void stackPaneListener(StackPane stackPane) {
         stackPane.setOnMouseClicked(mouseEvent -> {
+
             System.out.println("Mouse Clicked");
+            stackPane.setDisable(true);
+
+            int[] coords = (int[]) stackPane.getUserData();
+            ModelCell.Status status= board.shoot(coords[0], coords[1]);
+
+            if (status == ModelCell.Status.MISS) {
+                stackPane.getStyleClass().add("water");
+            }
+            else if (status == ModelCell.Status.HIT) {
+                stackPane.getStyleClass().add("hit");
+            }
+            else if (status == ModelCell.Status.KILLED) {
+                Ship targetShip = board.getShip(coords[0], coords[1]);
+                int[] targetCoords = (int[]) targetShip.getUserData();
+                int row = targetCoords[0];
+                int col = targetCoords[1];
+
+                setStackPaneState(targetShip, row, col, targetShip.getSize(), targetShip.isVertical());
+            }
         });
+    }
+
+    private void setStackPaneState(Ship ship, int row, int col, int size, boolean vertical) {
+        int init = vertical? row : col;
+
+        for (int target = init; target < init + size; target++) {
+
+            StackPane stackPane;
+            if (vertical) {
+                stackPane = getIAStacPane(target, col); //iteras el row
+            }
+            else{
+                stackPane = getIAStacPane(row, target); //iteras el col
+            }
+            assert stackPane != null;
+            stackPane.getStyleClass().add("killed");
+        }
+    }
+
+    private StackPane getIAStacPane(int row, int col) {
+        return iaBoardStackPanes[row][col];
     }
 
 

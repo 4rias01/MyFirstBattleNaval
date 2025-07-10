@@ -19,6 +19,20 @@
     -fx-border-width: 1px;
 }
 
+.StackPane.water{
+    -fx-background-image: url("../../Images/sceneImages/MISS.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
+
+.StackPane.hit{
+    -fx-background-color: yellow;
+}
+
+.StackPane.killed{
+    -fx-background-color: red;
+}
+
 .back-button{
     -fx-background-image: url("../../Images/sceneImages/backImage.png");
     -fx-min-width: 140;
