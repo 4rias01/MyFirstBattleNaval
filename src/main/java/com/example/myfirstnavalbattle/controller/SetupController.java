@@ -60,62 +60,62 @@ public class SetupController {
 
     }
 
-    private void initUserInfo(){
-        actualCharacter = SelectCharacter.getSelectedCharacter();
-        Image image = actualCharacter.getImage();
+    private void shipOnDragListener(Ship ship) {
+        ship.setOnDragDetected(event -> {
+            Dragboard db = ship.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString("ship");
 
-        characterImage.setImage(image);
-        characterImage.setFitHeight(300);
-        characterImage.setFitWidth(300);
-        characterImage.setVisible(false);
+            SnapshotParameters params = new SnapshotParameters();
+            params.setFill(Color.TRANSPARENT);
+            Image snapshot = getShipSnapshot(ship);
+            content.putImage(snapshot);
 
-        readyButton.setDisable(true);
-        readyButton.setVisible(false);
+            if (ship.isVertical()) { db.setDragView(snapshot, snapshot.getWidth() / 2, 25 );}
+            else { db.setDragView(snapshot, 25, snapshot.getHeight() / 2 );}
 
-        userNameTextField.setDisable(true);
-        userNameTextField.setVisible(false);
-        userNameTextField.textProperty().addListener(
-                (obs, oldText, newText)
-                        -> readyButton.setDisable(newText.length() <= 3));
+            db.setContent(content);
+            currentShip = ship;
+            setCurrenShipAttributes();
+
+            event.consume();
+        });
     }
 
-    private void initShips() {
-        makeAndAddShip(4);
-        makeAndAddShip(3);
-        makeAndAddShip(3);
-        makeAndAddShip(2);
-        makeAndAddShip(2);
-        makeAndAddShip(2);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-    }
-
-    @FXML
-    private void initGridPane() {
-
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE; col++) {
-                Cell cell = new Cell(row, col);
-                cell.setPrefSize(CELL_SIZE, CELL_SIZE);
-
-                cells[row][col] = cell;
-
-                cellOnDragOver(cell);
-                cellOnDragDropped(cell);
-
-                GridPane.setRowIndex(cell, row);
-                GridPane.setColumnIndex(cell, col);
-                gridpane.getChildren().add(cell);
+    private void cellOnDragOver(Cell cell) {
+        cell.setOnDragOver(event -> {
+            if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
             }
-        }
+            if (currentShip != null) {
+                if (canBePlaced(cell.getRow(), cell.getCol())) {
+                    setCellState(cell.getRow(), cell.getCol(), Cell.Status.OVER, null);
+                }
+            }
+            event.consume();
+        });
+        cell.setOnDragExited(event -> {
+            if (currentShip != null && cell.getStatus() == Cell.Status.OVER) {
+                setCellState(cell.getRow(), cell.getCol(), Cell.Status.EMPTY, null);
+            }
+        });
     }
 
+    private void cellOnDragDropped(Cell cell) {
+        cell.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                dropShipInCell(cell);
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+            activateUserInfo();
+        });
+    }
 
-    @FXML
     private void dropShipInCell(Cell cell) {
-
 
         int targetRow = cell.getRow();
         int targetCol = cell.getCol();
@@ -123,25 +123,44 @@ public class SetupController {
         boolean canBePlace = canBePlaced(targetRow, targetCol);
 
         if (canBePlace && currentShip.getParent() instanceof GridPane) {
-            setCellState(Cell.Status.EMPTY, null);
+            setCurrentShipLocation();
+            setCellState(currentShipRow, currentShipCol, Cell.Status.EMPTY, null);
+
             currentShip.setUserData(new int[]{targetRow, targetCol});
             setCurrentShipLocation();
 
-            setCellState(Cell.Status.SHIP, currentShip);
+            setCellState(currentShipRow, currentShipCol, Cell.Status.SHIP, currentShip);
             placeShipInGridPane();
         } else if (canBePlace) {
             currentShip.setUserData(new int[]{targetRow, targetCol});
             setCurrentShipLocation();
 
-            setCellState(Cell.Status.SHIP, currentShip);
+            setCellState(currentShipRow, currentShipCol, Cell.Status.SHIP, currentShip);
             placeShipInGridPane();
         }
 
     }
 
+    private boolean canBePlaced(int row, int col) {
+        int init = currentShipIsVertical ? row : col;
+        for (int target = init; target < init + currentShipSize; target++) {
 
-    private void setCellState(Cell.Status status, Ship ship) {
-        int init = currentShipIsVertical? currentShipRow : currentShipCol; // variable que ira iterando el for.
+            Cell cell;
+            if (currentShipIsVertical) {
+                cell = getCell(target,col);
+            }
+            else {
+                cell = getCell(row,target);
+            }
+
+            if (cell == null) { return false; }
+            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+        }
+        return true;
+    }
+
+    private void setCellState(int row, int col, Cell.Status status, Ship ship) {
+        int init = currentShipIsVertical? row : col; // variable que ira iterando el for.
         // Si es vertical, itera el row y col permanece fijo
         // si es horizontal, el row permanece fijo y itera el col
 
@@ -149,10 +168,10 @@ public class SetupController {
 
             Cell cell;
             if (currentShipIsVertical) {
-                cell = getCell(target, currentShipCol); //iteras el row
+                cell = getCell(target, col); //iteras el row
             }
             else{
-                cell = getCell(currentShipRow, target); //iteras el col
+                cell = getCell(row, target); //iteras el col
             }
             assert cell != null;
             cell.setStatus(status);
@@ -177,58 +196,6 @@ public class SetupController {
         }
     }
 
-    private boolean canBePlaced(int row, int col) {
-        int init = currentShipIsVertical ? row : col;
-        for (int target = init; target < init + currentShipSize; target++) {
-
-            Cell cell;
-            if (currentShipIsVertical) {
-                cell = getCell(target,col);
-            }
-            else {
-                cell = getCell(row,target);
-            }
-
-            if (cell == null) { return false; }
-            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
-        }
-        return true;
-    }
-
-
-    private void makeAndAddShip(int size) {
-        Ship ship = new Ship(size);
-        AnimationsManager.applyCursorEvents(ship)   ;
-
-        shipOnDragListener(ship);
-        clickOnShipListener(ship);
-        hBox.getChildren().add(ship);
-        ships.add(ship);
-    }
-
-    private void shipOnDragListener(Ship ship) {
-        ship.setOnDragDetected(event -> {
-            Dragboard db = ship.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.putString("ship");
-
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            Image snapshot = getShipSnapshot(ship);
-            content.putImage(snapshot);
-
-            if (ship.isVertical()) { db.setDragView(snapshot, snapshot.getWidth() / 2, 25 );}
-            else { db.setDragView(snapshot, 25, snapshot.getHeight() / 2 );}
-
-            db.setContent(content);
-            currentShip = ship;
-            setCurrenShipAttributes();
-
-            event.consume();
-        });
-    }
-
-
     private void clickOnShipListener(Ship ship) {
         ship.setOnMouseClicked(event -> {
             if(event.getButton() == MouseButton.SECONDARY){
@@ -241,7 +208,8 @@ public class SetupController {
                 setCurrenShipAttributes();
                 setCurrentShipLocation();
 
-                setCellState(Cell.Status.EMPTY, null);
+
+                setCellState(currentShipRow, currentShipCol, Cell.Status.EMPTY, null);
                 ((Pane) ship.getParent()).getChildren().remove(ship);
 
                 if (!currentShipIsVertical) {
@@ -251,76 +219,58 @@ public class SetupController {
                 activateUserInfo();
             }
         });
-
     }
 
+    private void initGridPane() {
 
-    private void cellOnDragOver(Cell cell) {
-        cell.setOnDragOver(event -> {
-            if (event.getGestureSource() != this && event.getDragboard().hasString()) {
-                event.acceptTransferModes(TransferMode.MOVE);
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                Cell cell = new Cell(row, col);
+                cell.setPrefSize(CELL_SIZE, CELL_SIZE);
+
+                cells[row][col] = cell;
+
+                cellOnDragOver(cell);
+                cellOnDragDropped(cell);
+
+                GridPane.setRowIndex(cell, row);
+                GridPane.setColumnIndex(cell, col);
+                gridpane.getChildren().add(cell);
             }
-            if (currentShip != null) {
-                currentShip.setUserData(new int[] {cell.getRow(), cell.getCol()});
-                setCurrenShipAttributes();
-                setCurrentShipLocation();
-                if (canBePlaced(cell.getRow(), cell.getCol())) {
-                    setCellState(Cell.Status.OVER, null);
-                }
-            }
-            event.consume();
-        });
-        cell.setOnDragExited(event -> {
-            setCurrenShipAttributes();
-            if (currentShip != null && cell.getStatus() == Cell.Status.OVER) {
-                setCellState(Cell.Status.EMPTY, null);
-            }
-        });
-    }
-
-    private void cellOnDragDropped(Cell cell) {
-        cell.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasString()) {
-                dropShipInCell(cell);
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-            activateUserInfo();
-        });
-    }
-
-    public Image getShipSnapshot(Ship ship) {
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-
-        return ship.snapshot(params, null);
-    }
-
-
-    private Cell getCell(int row, int col) {
-        if (row >= GRID_SIZE || col >= GRID_SIZE) {
-            return null;
         }
-        return cells[row][col];
     }
 
-
-    @FXML
-    private void handleBackButton() throws IOException {
-        SceneManager.switchScene("HomeScene");
+    private void initShips() {
+        makeAndAddShip(4);
+        makeAndAddShip(3);
+        makeAndAddShip(3);
+        makeAndAddShip(2);
+        makeAndAddShip(2);
+        makeAndAddShip(2);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
     }
 
-    @FXML
-    private void handleReadyButton() throws IOException {
-        Board board = new Board(cells, ships);
-        GameController.setBoard(board);
-        actualCharacter.setUsername(userNameTextField.getText());
-        SceneManager.switchScene("GameScene");
-    }
+    private void initUserInfo(){
+        actualCharacter = SelectCharacter.getSelectedCharacter();
+        Image image = actualCharacter.getImage();
 
+        characterImage.setImage(image);
+        characterImage.setFitHeight(300);
+        characterImage.setFitWidth(300);
+        characterImage.setVisible(false);
+
+        readyButton.setDisable(true);
+        readyButton.setVisible(false);
+
+        userNameTextField.setDisable(true);
+        userNameTextField.setVisible(false);
+        userNameTextField.textProperty().addListener(
+                (obs, oldText, newText)
+                        -> readyButton.setDisable(newText.length() <= 3));
+    }
 
     private void activateUserInfo() {
         if(hBox.getChildren().isEmpty()){
@@ -339,15 +289,56 @@ public class SetupController {
         }
     }
 
+    private void makeAndAddShip(int size) {
+        Ship ship = new Ship(size);
+        AnimationsManager.applyCursorEvents(ship)   ;
+
+        shipOnDragListener(ship);
+        clickOnShipListener(ship);
+        hBox.getChildren().add(ship);
+        ships.add(ship);
+    }
+
+    public Image getShipSnapshot(Ship ship) {
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+
+        return ship.snapshot(params, null);
+    }
+
+    private Cell getCell(int row, int col) {
+        if (row >= GRID_SIZE || col >= GRID_SIZE) {
+            return null;
+        }
+        return cells[row][col];
+    }
+
+    @FXML
+    private void handleBackButton() throws IOException {
+        SceneManager.switchScene("HomeScene");
+    }
+
+    @FXML
+    private void handleReadyButton() throws IOException {
+        Board board = new Board(cells, ships);
+        GameController.setBoard(board);
+        actualCharacter.setUsername(userNameTextField.getText());
+        SceneManager.switchScene("GameScene");
+    }
+
+
     private void setCurrenShipAttributes(){
         currentShipSize = currentShip.getSize();
         currentShipIsVertical = currentShip.isVertical();
     }
 
     private void setCurrentShipLocation(){
+
         int[] coords = (int[]) currentShip.getUserData();
         currentShipRow = coords[0];
         currentShipCol = coords[1];
+
+
     }
 
 }
