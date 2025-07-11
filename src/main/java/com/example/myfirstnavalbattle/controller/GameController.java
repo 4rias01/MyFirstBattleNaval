@@ -16,7 +16,6 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class GameController {
 
@@ -192,7 +191,7 @@ public class GameController {
 
     @FXML
     private void handleBackButton() throws IOException {
-        SceneManager.switchScene("HomeScene");
+        SceneManager.switchTo("HomeScene");
     }
 
     private void setIAView(boolean show){

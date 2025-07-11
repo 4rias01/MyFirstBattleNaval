@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Rectangle?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             stylesheets="@SetupSceneStyle.css"
@@ -19,10 +20,15 @@
               layoutX="200" layoutY="120">
     </GridPane>
 
+    <Rectangle width="510" height="270"
+               layoutX="790" layoutY="170" fx:id="rectangle"
+               styleClass="rectangles">
+    </Rectangle>
 
     <HBox layoutY="200" layoutX="800"
           fx:id="hBox">
     </HBox>
+
 
     <Button layoutY="20" layoutX="20"
             styleClass="back-button"

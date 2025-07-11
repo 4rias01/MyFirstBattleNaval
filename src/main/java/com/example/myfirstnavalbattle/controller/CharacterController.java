@@ -85,7 +85,7 @@ public class CharacterController {
 
     @FXML
     private void handleBackButton() throws IOException {
-        SceneManager.switchScene("HomeScene");
+        SceneManager.switchTo("HomeScene");
     }
 
     @FXML

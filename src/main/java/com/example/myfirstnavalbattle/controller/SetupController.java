@@ -21,6 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class SetupController {
     @FXML private Button readyButton;
     @FXML private ImageView characterImage;
     @FXML private TextField userNameTextField;
+    @FXML private Rectangle rectangle;
 
 
     @FXML
@@ -278,6 +280,7 @@ public class SetupController {
             characterImage.setVisible(true);
             userNameTextField.setVisible(true);
             userNameTextField.setDisable(false);
+            rectangle.setVisible(false);
         }
         else{
             characterImage.setVisible(false);
@@ -286,6 +289,7 @@ public class SetupController {
             userNameTextField.setDisable(true);
             userNameTextField.setVisible(false);
             userNameTextField.setText("");
+            rectangle.setVisible(true);
         }
     }
 
@@ -315,7 +319,7 @@ public class SetupController {
 
     @FXML
     private void handleBackButton() throws IOException {
-        SceneManager.switchScene("HomeScene");
+        SceneManager.switchTo("HomeScene");
     }
 
     @FXML
@@ -323,7 +327,7 @@ public class SetupController {
         Board board = new Board(cells, ships);
         GameController.setBoard(board);
         actualCharacter.setUsername(userNameTextField.getText());
-        SceneManager.switchScene("GameScene");
+        SceneManager.switchTo("GameScene");
     }
 
 
