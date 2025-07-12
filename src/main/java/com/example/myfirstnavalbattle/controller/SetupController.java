@@ -4,6 +4,7 @@ import com.example.myfirstnavalbattle.controller.setupStage.Cell;
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 import com.example.myfirstnavalbattle.model.Board;
 import com.example.myfirstnavalbattle.model.Characters;
+import com.example.myfirstnavalbattle.model.Player;
 import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
@@ -324,9 +325,12 @@ public class SetupController {
 
     @FXML
     private void handleReadyButton() throws IOException {
-        Board board = new Board(cells, ships);
-        GameController.setBoard(board);
-        actualCharacter.setUsername(userNameTextField.getText());
+        String playerName = userNameTextField.getText();
+        Player playerOne = new Player(playerName, cells, ships, actualCharacter);
+        Player playerIA = new Player();
+
+        GameController.setPlayerOne(playerOne);
+        GameController.setPlayerIA(playerIA);
         SceneManager.switchTo("GameScene");
     }
 
