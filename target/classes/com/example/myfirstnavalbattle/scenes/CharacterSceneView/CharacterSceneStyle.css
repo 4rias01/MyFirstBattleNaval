@@ -1,5 +1,5 @@
 .anchorpane{
-    -fx-background-image: url("../../Images/backgrounds/backgroundCharacter.jpg");
+    -fx-background-image: url("../../Images/backgrounds/backgroundCharacter.png");
     -fx-background-size: cover; /* o contain, según prefieras */
     -fx-background-position: center center;
     -fx-pref-width: 1366;

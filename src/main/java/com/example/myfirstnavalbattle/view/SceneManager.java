@@ -8,19 +8,29 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class SceneManager {
-    private static Stage mainStage;
+    private static Scene mainScene;
 
-    public static void setStage(Stage stage) { mainStage = stage; }
-
-    public static void switchScene(String sceneName) throws IOException {
-        FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource("/com/example/myfirstnavalbattle/scenes/"+ sceneName + "View/" + sceneName + ".fxml"));
+    public static void setStage(Stage stage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource(
+                "/com/example/myfirstnavalbattle/scenes/HomeSceneView/HomeScene.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root);
 
-        AnimationsManager.applyGlobalCursor(scene);
+        mainScene = new Scene(root);
+        AnimationsManager.applyGlobalCursor(mainScene);
         AnimationsManager.applyToAllButtons(root);
 
-        mainStage.setScene(scene);
-        mainStage.setFullScreen(false);
+        stage.setScene(mainScene);
+        stage.setFullScreen(true);
+    }
+
+    public static void switchTo(String sceneName) throws IOException {
+        FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource(
+                "/com/example/myfirstnavalbattle/scenes/"+ sceneName + "View/" + sceneName + ".fxml"));
+        Parent newRoot = loader.load();
+
+        AnimationsManager.applyGlobalCursor(mainScene);
+        AnimationsManager.applyToAllButtons(newRoot);
+
+        mainScene.setRoot(newRoot);
     }
 }

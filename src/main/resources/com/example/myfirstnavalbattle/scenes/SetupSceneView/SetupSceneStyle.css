@@ -31,6 +31,11 @@
     -fx-background-color: #070c47;
 }
 
+.rectangles{
+    -fx-arc-height: 70;
+    -fx-arc-width: 70;
+    -fx-fill: rgba(0, 0, 0, 0.8);
+}
 
 .ship {
     -fx-effect: dropshadow(gaussian, black, 5, 0.5, 0, 0);

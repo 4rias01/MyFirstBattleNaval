@@ -4,6 +4,7 @@ import com.example.myfirstnavalbattle.controller.setupStage.Cell;
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
 import com.example.myfirstnavalbattle.model.Board;
 import com.example.myfirstnavalbattle.model.Characters;
+import com.example.myfirstnavalbattle.model.Player;
 import com.example.myfirstnavalbattle.model.SelectCharacter;
 import com.example.myfirstnavalbattle.view.AnimationsManager;
 import com.example.myfirstnavalbattle.view.SceneManager;
@@ -21,29 +22,30 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class SetupController {
-    @FXML
-    private GridPane gridpane;
-    @FXML
-    private HBox hBox;
-    @FXML
-    private Button readyButton;
-    @FXML
-    private ImageView characterImage;
-    @FXML
-    private TextField userNameTextField;
-
+    private Cell[][] cells = null;
+    private ArrayList<Ship> ships = null;
     private Characters actualCharacter;
-
     private final int CELL_SIZE = 50;
     public final static int GRID_SIZE = 10;
 
-    private Cell[][] cells = null;
-    private ArrayList<Ship> ships = null;
+    private Ship currentShip;
+    private boolean currentShipIsVertical;
+    private int currentShipRow;
+    private int currentShipCol;
+    private int currentShipSize;
+
+    @FXML private GridPane gridpane;
+    @FXML private HBox hBox;
+    @FXML private Button readyButton;
+    @FXML private ImageView characterImage;
+    @FXML private TextField userNameTextField;
+    @FXML private Rectangle rectangle;
 
 
     @FXML
@@ -59,6 +61,199 @@ public class SetupController {
         gridpane.setMaxSize(500, 500);
         gridpane.setMinSize(500, 500);
 
+    }
+
+    private void shipOnDragListener(Ship ship) {
+        ship.setOnDragDetected(event -> {
+            Dragboard db = ship.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString("ship");
+
+            SnapshotParameters params = new SnapshotParameters();
+            params.setFill(Color.TRANSPARENT);
+            Image snapshot = getShipSnapshot(ship);
+            content.putImage(snapshot);
+
+            if (ship.isVertical()) { db.setDragView(snapshot, snapshot.getWidth() / 2, 25 );}
+            else { db.setDragView(snapshot, 25, snapshot.getHeight() / 2 );}
+
+            db.setContent(content);
+            currentShip = ship;
+            setCurrenShipAttributes();
+
+            event.consume();
+        });
+    }
+
+    private void cellOnDragOver(Cell cell) {
+        cell.setOnDragOver(event -> {
+            if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            if (currentShip != null) {
+                if (canBePlaced(cell.getRow(), cell.getCol())) {
+                    setCellState(cell.getRow(), cell.getCol(), Cell.Status.OVER, null);
+                }
+            }
+            event.consume();
+        });
+        cell.setOnDragExited(event -> {
+            if (currentShip != null && cell.getStatus() == Cell.Status.OVER) {
+                setCellState(cell.getRow(), cell.getCol(), Cell.Status.EMPTY, null);
+            }
+        });
+    }
+
+    private void cellOnDragDropped(Cell cell) {
+        cell.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                dropShipInCell(cell);
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+            activateUserInfo();
+        });
+    }
+
+    private void dropShipInCell(Cell cell) {
+
+        int targetRow = cell.getRow();
+        int targetCol = cell.getCol();
+
+        boolean canBePlace = canBePlaced(targetRow, targetCol);
+
+        if (canBePlace && currentShip.getParent() instanceof GridPane) {
+            setCurrentShipLocation();
+            setCellState(currentShipRow, currentShipCol, Cell.Status.EMPTY, null);
+
+            currentShip.setUserData(new int[]{targetRow, targetCol});
+            setCurrentShipLocation();
+
+            setCellState(currentShipRow, currentShipCol, Cell.Status.SHIP, currentShip);
+            placeShipInGridPane();
+        } else if (canBePlace) {
+            currentShip.setUserData(new int[]{targetRow, targetCol});
+            setCurrentShipLocation();
+
+            setCellState(currentShipRow, currentShipCol, Cell.Status.SHIP, currentShip);
+            placeShipInGridPane();
+        }
+
+    }
+
+    private boolean canBePlaced(int row, int col) {
+        int init = currentShipIsVertical ? row : col;
+        for (int target = init; target < init + currentShipSize; target++) {
+
+            Cell cell;
+            if (currentShipIsVertical) {
+                cell = getCell(target,col);
+            }
+            else {
+                cell = getCell(row,target);
+            }
+
+            if (cell == null) { return false; }
+            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
+        }
+        return true;
+    }
+
+    private void setCellState(int row, int col, Cell.Status status, Ship ship) {
+        int init = currentShipIsVertical? row : col; // variable que ira iterando el for.
+        // Si es vertical, itera el row y col permanece fijo
+        // si es horizontal, el row permanece fijo y itera el col
+
+        for (int target = init; target < init + currentShipSize; target++) {
+
+            Cell cell;
+            if (currentShipIsVertical) {
+                cell = getCell(target, col); //iteras el row
+            }
+            else{
+                cell = getCell(row, target); //iteras el col
+            }
+            assert cell != null;
+            cell.setStatus(status);
+            cell.setShip(ship);
+        }
+    }
+
+    private void placeShipInGridPane(){
+        if (currentShip.getParent() != null){
+            ((Pane) currentShip.getParent()).getChildren().remove(currentShip);
+        }
+
+        if (currentShipIsVertical){
+            gridpane.add(currentShip, currentShipCol, currentShipRow);
+            GridPane.setRowSpan(currentShip, currentShipSize);
+            GridPane.setColumnSpan(currentShip, 1);
+        }
+        else{
+            gridpane.add(currentShip, currentShipCol, currentShipRow);
+            GridPane.setRowSpan(currentShip, 1);
+            GridPane.setColumnSpan(currentShip, currentShipSize);
+        }
+    }
+
+    private void clickOnShipListener(Ship ship) {
+        ship.setOnMouseClicked(event -> {
+            if(event.getButton() == MouseButton.SECONDARY){
+                if (!(ship.getParent() instanceof GridPane)) {
+                    ship.rotateShip();
+                }
+            }
+            if (event.getClickCount() == 2 && ship.getParent() instanceof GridPane) {
+                currentShip = ship;
+                setCurrenShipAttributes();
+                setCurrentShipLocation();
+
+
+                setCellState(currentShipRow, currentShipCol, Cell.Status.EMPTY, null);
+                ((Pane) ship.getParent()).getChildren().remove(ship);
+
+                if (!currentShipIsVertical) {
+                    ship.rotateShip();
+                }
+                hBox.getChildren().add(ship);
+                activateUserInfo();
+            }
+        });
+    }
+
+    private void initGridPane() {
+
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                Cell cell = new Cell(row, col);
+                cell.setPrefSize(CELL_SIZE, CELL_SIZE);
+
+                cells[row][col] = cell;
+
+                cellOnDragOver(cell);
+                cellOnDragDropped(cell);
+
+                GridPane.setRowIndex(cell, row);
+                GridPane.setColumnIndex(cell, col);
+                gridpane.getChildren().add(cell);
+            }
+        }
+    }
+
+    private void initShips() {
+        makeAndAddShip(4);
+        makeAndAddShip(3);
+        makeAndAddShip(3);
+        makeAndAddShip(2);
+        makeAndAddShip(2);
+        makeAndAddShip(2);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
+        makeAndAddShip(1);
     }
 
     private void initUserInfo(){
@@ -80,122 +275,24 @@ public class SetupController {
                         -> readyButton.setDisable(newText.length() <= 3));
     }
 
-    private void initShips() {
-        makeAndAddShip(4);
-        makeAndAddShip(3);
-        makeAndAddShip(3);
-        makeAndAddShip(2);
-        makeAndAddShip(2);
-        makeAndAddShip(2);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-        makeAndAddShip(1);
-    }
-
-    @FXML
-    private void initGridPane() {
-
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE; col++) {
-                Cell cell = new Cell(row, col);
-                cell.setPrefSize(CELL_SIZE, CELL_SIZE);
-
-                cells[row][col] = cell;
-
-                cellOnDragOver(cell);
-                cellOnDragDropped(cell);
-
-                GridPane.setRowIndex(cell, row);
-                GridPane.setColumnIndex(cell, col);
-                gridpane.getChildren().add(cell);
-            }
+    private void activateUserInfo() {
+        if(hBox.getChildren().isEmpty()){
+            readyButton.setVisible(true);
+            characterImage.setVisible(true);
+            userNameTextField.setVisible(true);
+            userNameTextField.setDisable(false);
+            rectangle.setVisible(false);
+        }
+        else{
+            characterImage.setVisible(false);
+            readyButton.setVisible(false);
+            readyButton.setDisable(true);
+            userNameTextField.setDisable(true);
+            userNameTextField.setVisible(false);
+            userNameTextField.setText("");
+            rectangle.setVisible(true);
         }
     }
-
-
-    @FXML
-    private void dropShipInCell(Cell cell) {
-
-        Ship ship = Ship.currentlyDraggedShip;
-        int size = ship.getSize();
-        boolean vertical = ship.isVertical();
-
-        int targetRow = cell.getRow();
-        int targetCol = cell.getCol();
-
-        int spanCols = (int) Math.ceil(ship.getWidth() / CELL_SIZE);  // = 2
-        int spanRows = (int) Math.ceil(ship.getHeight() / CELL_SIZE);
-
-        boolean canBePlace = canBePlaced(targetRow, targetCol, vertical, size);
-
-        if (canBePlace && ship.getParent() instanceof GridPane) {
-            int oldRow, oldCol;
-            int[] coords = (int[]) ship.getUserData();
-            oldRow = coords[0];
-            oldCol = coords[1];
-            setCellState(oldRow, oldCol, size, vertical, Cell.Status.EMPTY, null);
-
-            ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
-            placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
-        } else if (canBePlace) {
-            ship.setUserData(new int[]{targetRow, targetCol});
-            setCellState(targetRow, targetCol, size, vertical, Cell.Status.SHIP, ship);
-            placeShipInGridPane(ship, targetCol, targetRow, spanCols, spanRows);
-        }
-
-    }
-
-
-    private void setCellState(int row, int col, int size, boolean vertical, Cell.Status status, Ship ship) {
-        int init = vertical? row : col; // variable que ira iterando el for.
-        // Si es vertical, itera el row y col permanece fijo
-        // si es horizontal, el row permanece fijo y itera el col
-
-        for (int target = init; target < init + size; target++) {
-
-            Cell cell;
-            if (vertical) {
-                cell = getCell(target, col); //iteras el row
-            }
-            else{
-                cell = getCell(row, target); //iteras el col
-            }
-            assert cell != null;
-            cell.setStatus(status);
-            cell.setShip(ship);
-        }
-    }
-
-    @FXML
-    private void placeShipInGridPane(Ship ship, int col, int row, int spanCols, int spanRows) {
-        if (ship.getParent() != null) {
-            ((Pane) ship.getParent()).getChildren().remove(ship);
-        }
-        gridpane.add(ship, col, row);
-        GridPane.setColumnSpan(ship, spanCols);
-        GridPane.setRowSpan(ship, spanRows);
-    }
-
-    private boolean canBePlaced(int row, int col, boolean vertical, int size) {
-        int init = vertical ? row : col;
-        for (int target = init; target < init + size; target++) {
-
-            Cell cell;
-            if (vertical) {
-                cell = getCell(target,col);
-            }
-            else {
-                cell = getCell(row,target);
-            }
-
-            if (cell == null) { return false; }
-            if (cell.getStatus() == Cell.Status.SHIP) { return false; }
-        }
-        return true;
-    }
-
 
     private void makeAndAddShip(int size) {
         Ship ship = new Ship(size);
@@ -207,102 +304,12 @@ public class SetupController {
         ships.add(ship);
     }
 
-    private void shipOnDragListener(Ship ship) {
-        ship.setOnDragDetected(event -> {
-            Dragboard db = ship.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.putString("ship");
-
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            Image snapshot = getShipSnapshot(ship);
-            content.putImage(snapshot);
-
-            if (ship.isVertical()) { db.setDragView(snapshot, snapshot.getWidth() / 2, 25 );}
-            else { db.setDragView(snapshot, 25, snapshot.getHeight() / 2 );}
-
-            db.setContent(content);
-            Ship.currentlyDraggedShip = ship;
-
-            event.consume();
-        });
-    }
-
-
-    private void clickOnShipListener(Ship ship) {
-        ship.setOnMouseClicked(event -> {
-            if(event.getButton() == MouseButton.SECONDARY){
-                if (!(ship.getParent() instanceof GridPane)) {
-                    ship.rotateShip();
-                }
-            }
-            if (event.getClickCount() == 2 && ship.getParent() instanceof GridPane) {
-
-                int[] coords = (int[]) ship.getUserData();
-                boolean vertical = ship.isVertical();
-                int size = ship.getSize();
-                int row, col;
-
-                row = coords[0];
-                col = coords[1];
-
-                setCellState(row, col, size, vertical, Cell.Status.EMPTY, null);
-
-                ((Pane) ship.getParent()).getChildren().remove(ship);
-                if (!vertical) {
-                    ship.rotateShip();
-                }
-                hBox.getChildren().add(ship);
-                activateUserInfo();
-            }
-        });
-
-    }
-
-
-    private void cellOnDragOver(Cell cell) {
-        cell.setOnDragOver(event -> {
-            if (event.getGestureSource() != this && event.getDragboard().hasString()) {
-                event.acceptTransferModes(TransferMode.MOVE);
-            }
-            if (Ship.currentlyDraggedShip != null) {
-                Ship ship = Ship.currentlyDraggedShip;
-                if (canBePlaced(cell.getRow(), cell.getCol(), ship.isVertical(), ship.getSize())) {
-                    setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.OVER, null);
-                }
-            }
-            event.consume();
-        });
-        cell.setOnDragExited(event -> {
-            if (Ship.currentlyDraggedShip != null && cell.getStatus() == Cell.Status.OVER) {
-                Ship ship = Ship.currentlyDraggedShip;
-                setCellState(cell.getRow(), cell.getCol(), ship.getSize(), ship.isVertical(), Cell.Status.EMPTY, null);
-
-            }
-        });
-    }
-
-    private void cellOnDragDropped(Cell cell) {
-        cell.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasString()) {
-                dropShipInCell(cell);
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-            activateUserInfo();
-        });
-    }
-
     public Image getShipSnapshot(Ship ship) {
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
 
         return ship.snapshot(params, null);
     }
-
 
     private Cell getCell(int row, int col) {
         if (row >= GRID_SIZE || col >= GRID_SIZE) {
@@ -311,36 +318,35 @@ public class SetupController {
         return cells[row][col];
     }
 
-
     @FXML
     private void handleBackButton() throws IOException {
-        SceneManager.switchScene("HomeScene");
+        SceneManager.switchTo("HomeScene");
     }
 
     @FXML
     private void handleReadyButton() throws IOException {
-        Board board = new Board(cells, ships);
-        GameController.setBoard(board);
-        actualCharacter.setUsername(userNameTextField.getText());
-        SceneManager.switchScene("GameScene");
+        String playerName = userNameTextField.getText();
+        Player playerOne = new Player(playerName, cells, ships, actualCharacter);
+        Player playerIA = new Player();
+
+        GameController.setPlayerOne(playerOne);
+        GameController.setPlayerIA(playerIA);
+        SceneManager.switchTo("GameScene");
     }
 
 
-    private void activateUserInfo() {
-        if(hBox.getChildren().isEmpty()){
-            readyButton.setVisible(true);
-            characterImage.setVisible(true);
-            userNameTextField.setVisible(true);
-            userNameTextField.setDisable(false);
-        }
-        else{
-            characterImage.setVisible(false);
-            readyButton.setVisible(false);
-            readyButton.setDisable(true);
-            userNameTextField.setDisable(true);
-            userNameTextField.setVisible(false);
-            userNameTextField.setText("");
-        }
+    private void setCurrenShipAttributes(){
+        currentShipSize = currentShip.getSize();
+        currentShipIsVertical = currentShip.isVertical();
+    }
+
+    private void setCurrentShipLocation(){
+
+        int[] coords = (int[]) currentShip.getUserData();
+        currentShipRow = coords[0];
+        currentShipCol = coords[1];
+
+
     }
 
 }
