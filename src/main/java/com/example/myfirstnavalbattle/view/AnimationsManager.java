@@ -20,7 +20,6 @@ public class AnimationsManager {
     private static final ImageCursor cursorDefault;
     private static final ImageCursor cursorHover;
     private static final ImageCursor cursorPressed;
-    private static final Map<Node, Animation[]> activeAnimations = new HashMap<>();
 
     static{
         cursorDefault = new ImageCursor(new Image(Objects.requireNonNull(AnimationsManager.class.getResourceAsStream("/com/example/myfirstnavalbattle/Images/sceneImages/CURSORDEFAULT.png"))));
@@ -31,7 +30,6 @@ public class AnimationsManager {
     public static void applyGlobalCursor(Scene scene) {
         scene.setCursor(cursorDefault);
     }
-
 
     public static void applyToAllButtons(Parent root) {
         root.lookupAll(".button").forEach(node -> {
@@ -58,7 +56,6 @@ public class AnimationsManager {
 
     public static void translateAndScale(Node node, double posX, double posY, double scaleX, double scaleY, ImageCursor cursor) {
         node.setCursor(cursor);
-        //cancelAnimations(node);
 
         TranslateTransition move = new TranslateTransition(Duration.millis(200), node);
         move.setToX(posX);
@@ -71,20 +68,6 @@ public class AnimationsManager {
         ParallelTransition animation = new ParallelTransition(move, scale);
         animation.play();
 
-        activeAnimations.put(node, new Animation[]{animation});
     }
-
-    /*
-    private static void cancelAnimations(Node node) {
-        Animation[] running = activeAnimations.get(node);
-        if (running != null) {
-            for (Animation anim : running) {
-                if (anim.getStatus() == Animation.Status.RUNNING) {
-                    anim.stop(); // Ahora es seguro, porque estás deteniendo solo la animación raíz
-                }
-            }
-            activeAnimations.remove(node);
-        }
-    }*/
 
 }
