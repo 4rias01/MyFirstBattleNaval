@@ -15,7 +15,6 @@ public class Board {
 
     public Board() {
         size = SetupController.GRID_SIZE;
-
         cells = new ModelCell[size][size];
         ships = new ArrayList<>();
 
@@ -75,7 +74,7 @@ public class Board {
                         ship.rotateShip();
                     }
                     ship.setUserData( new int[] {row, col} );
-                    setModelCellsState(ship, row, col, size, vertical, ModelCell.Status.SHIP);
+                    setModelCellsState(ship, ModelCell.Status.SHIP);
                     break;
                 }
             }
@@ -100,23 +99,30 @@ public class Board {
         return true;
     }
 
-    private void setModelCellsState(Ship ship, int row, int col, int size, boolean vertical, ModelCell.Status status) {
-        int init = vertical? row : col; // variable que ira iterando el for.
+    private void setModelCellsState(Ship targetShip, ModelCell.Status status) {
         // Si es vertical, itera el row y col permanece fijo
         // si es horizontal, el row permanece fijo y itera el col
+        int[] coords = (int[]) targetShip.getUserData();
+        int shipRow = coords[0];
+        int shipCol = coords[1];
+        boolean vertical = targetShip.isVertical();
+        int size = targetShip.getSize();
+
+
+        int init = vertical? shipRow : shipCol; // variable que ira iterando el for.
 
         for (int target = init; target < init + size; target++) {
 
             ModelCell cell;
             if (vertical) {
-                cell = getCell(target, col); //iteras el row
+                cell = getCell(target, shipCol); //iteras el row
             }
             else{
-                cell = getCell(row, target); //iteras el col
+                cell = getCell(shipRow, target); //iteras el col
             }
             assert cell != null;
             cell.setStatus(status);
-            cell.setShip(ship);
+            cell.setShip(targetShip);
         }
     }
 
@@ -134,37 +140,47 @@ public class Board {
         else{
             cell.setStatus(ModelCell.Status.HIT);
             Ship targetShip = cell.getShip();
-            int[] coords = (int[]) targetShip.getUserData();
-            int shipRow = coords[0];
-            int shipCol = coords[1];
-            boolean vertical = targetShip.isVertical();
-            int size = targetShip.getSize();
 
-            if(isShipAlive(shipRow, shipCol, vertical, size)) {
+            if(isShipAlive(targetShip)) {
                 return ModelCell.Status.HIT;
             }
             else{
-                setModelCellsState(targetShip, shipRow, shipCol, size, vertical, ModelCell.Status.KILLED);
+                setModelCellsState(targetShip, ModelCell.Status.KILLED);
                 return ModelCell.Status.KILLED;
             }
         }
     }
 
-    private boolean isShipAlive(int row, int col, boolean vertical, int size) {
-        int init = vertical? row : col;
+    private boolean isShipAlive(Ship targetShip) {
+        int[] coords = (int[]) targetShip.getUserData();
+        int shipRow = coords[0];
+        int shipCol = coords[1];
+        boolean vertical = targetShip.isVertical();
+        int size = targetShip.getSize();
+
+        int init = vertical? shipRow : shipCol;
 
         for (int target = init; target < init + size; target++) {
 
             ModelCell cell;
             if (vertical) {
-                cell = getCell(target, col);
+                cell = getCell(target, shipCol);
             }
             else{
-                cell = getCell(row, target);
+                cell = getCell(shipRow, target);
             }
             assert cell != null;
 
             if (cell.getStatus() == ModelCell.Status.SHIP) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean stillShipsAlive(){
+        for (Ship ship : ships) {
+            if(isShipAlive(ship)){
                 return true;
             }
         }
