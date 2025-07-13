@@ -54,7 +54,7 @@ public class Board {
 
         for (int row = 0; row < sizeOfGrid; row++) {
             for (int col = 0; col < sizeOfGrid; col++) {
-                ModelCell iaCell = new ModelCell(row, col);
+                ModelCell iaCell = new ModelCell();
                 cells[row][col] = iaCell;
             }
         }

@@ -6,12 +6,15 @@ import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class HomeController {
-    @FXML
-    private ImageView characterImage1;
+    @FXML private Circle circleCharacter;
 
     Characters selectedCharacter;
 
@@ -19,10 +22,10 @@ public class HomeController {
     @FXML
     private void initialize() {
         selectedCharacter = SelectCharacter.getSelectedCharacter();
-        Image image = selectedCharacter.getImage();
-        characterImage1.setImage(image);
-        characterImage1.setFitHeight(120);
-        characterImage1.setFitWidth(120);
+        String path = selectedCharacter.getPath();
+
+        Image image = new Image(Objects.requireNonNull(getClass().getResource(path)).toExternalForm());
+        circleCharacter.setFill(new ImagePattern(image));
 
     }
 

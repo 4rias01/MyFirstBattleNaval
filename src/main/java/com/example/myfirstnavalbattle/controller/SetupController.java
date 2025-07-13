@@ -26,6 +26,7 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SetupController {
     private Cell[][] cells = null;
@@ -108,7 +109,7 @@ public class SetupController {
         cell.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
-            if (db.hasString()) {
+            if (Objects.equals(db.getString(), "ship")) {
                 dropShipInCell(cell);
                 success = true;
             }

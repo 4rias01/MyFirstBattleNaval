@@ -16,14 +16,11 @@ public class ModelCell {
 
     private Status status;
 
-    private final int row;
-    private final int col;
+
     private Ship ship;
 
 
     public ModelCell(Cell cell) {
-        row = cell.getRow();
-        col = cell.getCol();
         this.ship = cell.getShip();
 
         this.status = switch (cell.getStatus()) {
@@ -33,9 +30,7 @@ public class ModelCell {
         };
     }
 
-    public ModelCell(int row, int col) {
-        this.row = row;
-        this.col = col;
+    public ModelCell() {
         ship = null;
         status = Status.EMPTY;
     }
@@ -50,6 +45,4 @@ public class ModelCell {
     public void setShip(Ship ship) { this.ship = ship; }
 
     public Status getStatus() { return status; }
-    public int getRow() { return row; }
-    public int getCol() { return col; }
 }

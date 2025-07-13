@@ -185,7 +185,10 @@ public class GameController {
             setStackPaneState(player, shipRow, shipCol, targetShip.getSize(), targetShip.isVertical());
             if(player.isHasLost()){
                 finishGame();
-                System.out.println("Lost");
+                if(playerIsIA)
+                    System.out.println("playerOne has lost");
+                else
+                    System.out.println("playerIA has lost");
             } else if (playerIsIA) {
                 randomShoot();
             }

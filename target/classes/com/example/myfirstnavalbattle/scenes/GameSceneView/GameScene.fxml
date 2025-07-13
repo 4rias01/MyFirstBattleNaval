@@ -15,11 +15,11 @@
             prefHeight="400.0" prefWidth="600.0">
 
     <GridPane fx:id="gridPaneIA"
-              layoutX="200" layoutY="120" styleClass="GridPane">
+              layoutX="800" layoutY="220" styleClass="GridPane">
     </GridPane>
 
     <GridPane fx:id="gridPanePlayer"
-              layoutX="800" layoutY="120" styleClass="GridPane">
+              layoutX="300" layoutY="220" styleClass="GridPane">
     </GridPane>
 
     <Button layoutY="20" layoutX="20"

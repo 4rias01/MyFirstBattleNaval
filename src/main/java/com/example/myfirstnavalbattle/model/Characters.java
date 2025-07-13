@@ -9,12 +9,18 @@ public class Characters {
     private final String name;
     private final Image image;
     private String username;
+    private String path;
 
 
     public Characters(String name) {
         this.name = "Capitán "+ name;
-        this.image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/myfirstnavalbattle/Images/captains/CAPTAIN" + name.toUpperCase() + ".png")));
+        this.path = "/com/example/myfirstnavalbattle/Images/captains/CAPTAIN" + name.toUpperCase() + ".png";
+        this.image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
         this.username = null;
+    }
+
+    public String getPath(){
+        return path;
     }
 
     public void setUsername(String username) {
