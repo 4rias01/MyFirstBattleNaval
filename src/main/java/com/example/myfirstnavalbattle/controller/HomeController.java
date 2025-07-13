@@ -15,18 +15,15 @@ import java.util.Objects;
 
 public class HomeController {
     @FXML private Circle circleCharacter;
-
     Characters selectedCharacter;
 
 
     @FXML
     private void initialize() {
         selectedCharacter = SelectCharacter.getSelectedCharacter();
-        String path = selectedCharacter.getPath();
 
-        Image image = new Image(Objects.requireNonNull(getClass().getResource(path)).toExternalForm());
+        Image image = selectedCharacter.getImage();
         circleCharacter.setFill(new ImagePattern(image));
-
     }
 
 

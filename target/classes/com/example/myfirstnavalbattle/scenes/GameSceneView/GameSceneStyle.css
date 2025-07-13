@@ -43,3 +43,14 @@
 .back-button:hover{
     -fx-background-image: url("../../Images/sceneImages/backImageHover.png");
 }
+
+.Circle{
+    -fx-fill: rgba(0, 0, 0, 0.7);
+}
+
+.Title{
+    -fx-font-family: "Open Sans Bold";
+    -fx-font-size: 30;
+    -fx-text-fill: white;
+    -fx-spacing: -4px;
+}

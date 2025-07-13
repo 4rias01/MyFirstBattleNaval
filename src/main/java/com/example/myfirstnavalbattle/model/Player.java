@@ -1,7 +1,4 @@
 package com.example.myfirstnavalbattle.model;
-/**
- * @author: 4rias01
- */
 
 // imports
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;

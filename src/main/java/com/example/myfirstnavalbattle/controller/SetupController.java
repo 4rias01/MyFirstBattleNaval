@@ -2,7 +2,6 @@ package com.example.myfirstnavalbattle.controller;
 
 import com.example.myfirstnavalbattle.controller.setupStage.Cell;
 import com.example.myfirstnavalbattle.controller.setupStage.Ship;
-import com.example.myfirstnavalbattle.model.Board;
 import com.example.myfirstnavalbattle.model.Characters;
 import com.example.myfirstnavalbattle.model.Player;
 import com.example.myfirstnavalbattle.model.SelectCharacter;
@@ -271,9 +270,24 @@ public class SetupController {
 
         userNameTextField.setDisable(true);
         userNameTextField.setVisible(false);
-        userNameTextField.textProperty().addListener(
-                (obs, oldText, newText)
-                        -> readyButton.setDisable(newText.length() <= 3));
+        initTextFieldListener(userNameTextField);
+    }
+
+    private void initTextFieldListener(TextField textField) {
+        textField.textProperty().addListener((obs, oldText, newText) -> {
+            String sinNumeros = newText.replaceAll("[0-9]", "");
+            String textoLimpio = sinNumeros.trim();
+
+            if (textoLimpio.length() > 15) {
+                textoLimpio = textoLimpio.substring(0, 15);
+            }
+
+            if (!textoLimpio.equals(newText)) {
+                userNameTextField.setText(textoLimpio);
+            }
+
+            readyButton.setDisable(textoLimpio.length() <= 3);
+        });
     }
 
     private void activateUserInfo() {
@@ -282,7 +296,11 @@ public class SetupController {
             characterImage.setVisible(true);
             userNameTextField.setVisible(true);
             userNameTextField.setDisable(false);
-            rectangle.setVisible(false);
+
+            rectangle.setX(-25);
+            rectangle.setY(-100);
+            rectangle.setWidth(510);
+            rectangle.setHeight(600);
         }
         else{
             characterImage.setVisible(false);
@@ -291,7 +309,12 @@ public class SetupController {
             userNameTextField.setDisable(true);
             userNameTextField.setVisible(false);
             userNameTextField.setText("");
+
             rectangle.setVisible(true);
+            rectangle.setX(0);
+            rectangle.setY(0);
+            rectangle.setWidth(510);
+            rectangle.setHeight(270);
         }
     }
 
@@ -319,6 +342,20 @@ public class SetupController {
         return cells[row][col];
     }
 
+    private void setCurrenShipAttributes(){
+        currentShipSize = currentShip.getSize();
+        currentShipIsVertical = currentShip.isVertical();
+    }
+
+    private void setCurrentShipLocation(){
+
+        int[] coords = (int[]) currentShip.getUserData();
+        currentShipRow = coords[0];
+        currentShipCol = coords[1];
+
+
+    }
+
     @FXML
     private void handleBackButton() throws IOException {
         SceneManager.switchTo("HomeScene");
@@ -334,20 +371,4 @@ public class SetupController {
         GameController.setPlayerIA(playerIA);
         SceneManager.switchTo("GameScene");
     }
-
-
-    private void setCurrenShipAttributes(){
-        currentShipSize = currentShip.getSize();
-        currentShipIsVertical = currentShip.isVertical();
-    }
-
-    private void setCurrentShipLocation(){
-
-        int[] coords = (int[]) currentShip.getUserData();
-        currentShipRow = coords[0];
-        currentShipCol = coords[1];
-
-
-    }
-
 }

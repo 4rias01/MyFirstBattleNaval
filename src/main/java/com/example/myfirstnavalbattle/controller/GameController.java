@@ -7,68 +7,71 @@ import com.example.myfirstnavalbattle.model.ModelCell;
 import com.example.myfirstnavalbattle.model.Player;
 import com.example.myfirstnavalbattle.view.SceneManager;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 public class GameController {
-
-    @FXML
-    private GridPane gridPanePlayer;
-    private ArrayList<Ship> playerShips = null;
-
-    @FXML
-    private GridPane gridPaneIA;
-    private ArrayList<Ship> iaShips = null;
-    private ArrayList<ImageView> iaShipsImageView = null;
-
-    private StackPane[][] stackPanesOfIA = null;
-    private StackPane[][] stackPanesOfPlayer = null;
-    private ArrayList<StackPane> stackPanesPlayerAlive;
-
-    @FXML
-    AnchorPane anchorPane;
+    @FXML AnchorPane anchorPane;
+    @FXML private GridPane gridPanePlayer;
+    @FXML private GridPane gridPaneIA;
+    @FXML Circle playerOneCharacter;
+    @FXML Circle playerTwoCharacter;
+    @FXML Label labelName;
 
     private static Player playerOne;
     private static Player playerIA;
     private Board playerOneBoard;
     private Board playerIABoard;
 
+    private ArrayList<Ship> playerShips = null;
+    private ArrayList<Ship> iaShips = null;
+    private StackPane[][] stackPanesOfPlayer = null;
+    private StackPane[][] stackPanesOfIA = null;
+
+    private ArrayList<StackPane> stackPanesPlayerAlive;
+    private ArrayList<ImageView> iaShipsImageView = null;
+
     public GameController() {
     }
 
     @FXML
     public void initialize() {
-
+        addListenerToScene(anchorPane);
         int size = SetupController.GRID_SIZE;
         int margins = 450;
-        addListenerToScene(anchorPane);
+
+        playerOneBoard = playerOne.getBoard();
+        playerIABoard = playerIA.getBoard();
+
+        Image imageCharacterOne = playerOne.getCharacter().getImage();
+        Image imageCharacterTwo = playerIA.getCharacter().getImage();
+        playerOneCharacter.setFill(new ImagePattern(imageCharacterOne));
+        playerTwoCharacter.setFill(new ImagePattern(imageCharacterTwo));
+        labelName.setText(playerOne.getPlayerName());
 
         stackPanesOfIA = new StackPane[size][size];
         stackPanesOfPlayer = new StackPane[size][size];
         stackPanesPlayerAlive = new ArrayList<>();
 
-        playerOneBoard = playerOne.getBoard();
-        playerIABoard = playerIA.getBoard();
-        assert playerOneBoard != null;
-
         playerShips = playerOneBoard.getShips();
         iaShips = playerIABoard.getShips();
-        assert iaShips != null;
         iaShipsImageView = new ArrayList<>();
 
         initGridPane(gridPanePlayer, margins, size, 45);
         initGridPane(gridPaneIA, margins, size, 45);
-
         initShips();
     }
 
